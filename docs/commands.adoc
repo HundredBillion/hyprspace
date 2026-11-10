@@ -1,0 +1,331 @@
+= HyprSpace Commands
+include::util/site-attributes.adoc[]
+
+include::util/header.adoc[]
+
+Commands documentation is also available as manpages.
+
+== balance-sizes
+----
+include::hyprspace-balance-sizes.adoc[tags=synopsis]
+----
+include::hyprspace-balance-sizes.adoc[tags=purpose]
+include::hyprspace-balance-sizes.adoc[tags=body]
+
+== close
+----
+include::hyprspace-close.adoc[tags=synopsis]
+----
+include::hyprspace-close.adoc[tags=purpose]
+include::hyprspace-close.adoc[tags=body]
+
+== close-all-windows-but-current
+----
+include::hyprspace-close-all-windows-but-current.adoc[tags=synopsis]
+----
+include::hyprspace-close-all-windows-but-current.adoc[tags=purpose]
+include::hyprspace-close-all-windows-but-current.adoc[tags=body]
+
+== config
+----
+include::hyprspace-config.adoc[tags=synopsis]
+----
+include::hyprspace-config.adoc[tags=purpose]
+include::hyprspace-config.adoc[tags=body]
+
+== debug-windows
+----
+include::hyprspace-debug-windows.adoc[tags=synopsis]
+----
+include::hyprspace-debug-windows.adoc[tags=purpose]
+include::hyprspace-debug-windows.adoc[tags=body]
+
+== echo
+----
+include::hyprspace-echo.adoc[tags=synopsis]
+----
+include::hyprspace-echo.adoc[tags=purpose]
+include::hyprspace-echo.adoc[tags=body]
+
+== enable
+----
+include::hyprspace-enable.adoc[tags=synopsis]
+----
+include::hyprspace-enable.adoc[tags=purpose]
+include::hyprspace-enable.adoc[tags=body]
+
+== eval
+----
+include::hyprspace-eval.adoc[tags=synopsis]
+----
+include::hyprspace-eval.adoc[tags=purpose]
+include::hyprspace-eval.adoc[tags=body]
+
+== exec-and-forget
+----
+include::hyprspace-exec-and-forget.adoc[tags=synopsis]
+----
+include::hyprspace-exec-and-forget.adoc[tags=purpose]
+include::hyprspace-exec-and-forget.adoc[tags=body]
+
+== false
+----
+include::hyprspace-false.adoc[tags=synopsis]
+----
+include::hyprspace-false.adoc[tags=purpose]
+include::hyprspace-false.adoc[tags=body]
+
+== flatten-workspace-tree
+----
+include::hyprspace-flatten-workspace-tree.adoc[tags=synopsis]
+----
+include::hyprspace-flatten-workspace-tree.adoc[tags=purpose]
+include::hyprspace-flatten-workspace-tree.adoc[tags=body]
+
+== focus
+----
+include::hyprspace-focus.adoc[tags=synopsis]
+----
+include::hyprspace-focus.adoc[tags=purpose]
+include::hyprspace-focus.adoc[tags=body]
+
+== focus-back-and-forth
+----
+
+include::./hyprspace-focus-back-and-forth.adoc[tags=synopsis]
+----
+include::./hyprspace-focus-back-and-forth.adoc[tags=purpose]
+include::./hyprspace-focus-back-and-forth.adoc[tags=body]
+
+== focus-monitor
+----
+include::hyprspace-focus-monitor.adoc[tags=synopsis]
+----
+include::hyprspace-focus-monitor.adoc[tags=purpose]
+include::hyprspace-focus-monitor.adoc[tags=body]
+
+== fullscreen
+----
+include::hyprspace-fullscreen.adoc[tags=synopsis]
+----
+include::hyprspace-fullscreen.adoc[tags=purpose]
+include::hyprspace-fullscreen.adoc[tags=body]
+
+== join-with
+----
+include::hyprspace-join-with.adoc[tags=synopsis]
+----
+include::hyprspace-join-with.adoc[tags=purpose]
+include::hyprspace-join-with.adoc[tags=body]
+
+== layout
+----
+include::hyprspace-layout.adoc[tags=synopsis]
+----
+include::hyprspace-layout.adoc[tags=purpose]
+include::hyprspace-layout.adoc[tags=body]
+
+== list-apps
+----
+include::hyprspace-list-apps.adoc[tags=synopsis]
+----
+include::hyprspace-list-apps.adoc[tags=purpose]
+include::hyprspace-list-apps.adoc[tags=body]
+
+== list-exec-env-vars
+----
+include::hyprspace-list-exec-env-vars.adoc[tags=synopsis]
+----
+include::hyprspace-list-exec-env-vars.adoc[tags=purpose]
+include::hyprspace-list-exec-env-vars.adoc[tags=body]
+
+== list-modes
+----
+include::hyprspace-list-modes.adoc[tags=synopsis]
+----
+include::hyprspace-list-modes.adoc[tags=purpose]
+include::hyprspace-list-modes.adoc[tags=body]
+
+== list-monitors
+----
+include::hyprspace-list-monitors.adoc[tags=synopsis]
+----
+include::hyprspace-list-monitors.adoc[tags=purpose]
+include::hyprspace-list-monitors.adoc[tags=body]
+
+== list-windows
+----
+include::hyprspace-list-windows.adoc[tags=synopsis]
+----
+include::hyprspace-list-windows.adoc[tags=purpose]
+include::hyprspace-list-windows.adoc[tags=body]
+
+== list-workspaces
+----
+include::hyprspace-list-workspaces.adoc[tags=synopsis]
+----
+include::hyprspace-list-workspaces.adoc[tags=purpose]
+include::hyprspace-list-workspaces.adoc[tags=body]
+
+== macos-native-fullscreen
+----
+include::hyprspace-macos-native-fullscreen.adoc[tags=synopsis]
+----
+include::hyprspace-macos-native-fullscreen.adoc[tags=purpose]
+include::hyprspace-macos-native-fullscreen.adoc[tags=body]
+
+== macos-native-minimize
+----
+include::hyprspace-macos-native-minimize.adoc[tags=synopsis]
+----
+include::hyprspace-macos-native-minimize.adoc[tags=purpose]
+include::hyprspace-macos-native-minimize.adoc[tags=body]
+
+== mode
+----
+include::hyprspace-mode.adoc[tags=synopsis]
+----
+include::hyprspace-mode.adoc[tags=purpose]
+include::hyprspace-mode.adoc[tags=body]
+
+[#move]
+== move
+----
+include::hyprspace-move.adoc[tags=synopsis]
+----
+include::hyprspace-move.adoc[tags=purpose]
+include::hyprspace-move.adoc[tags=body]
+
+== move-mouse
+----
+include::./hyprspace-move-mouse.adoc[tags=synopsis]
+----
+include::./hyprspace-move-mouse.adoc[tags=purpose]
+include::./hyprspace-move-mouse.adoc[tags=body]
+
+== move-node-to-monitor
+----
+include::hyprspace-move-node-to-monitor.adoc[tags=synopsis]
+----
+include::hyprspace-move-node-to-monitor.adoc[tags=purpose]
+include::hyprspace-move-node-to-monitor.adoc[tags=body]
+
+== move-node-to-workspace
+----
+include::hyprspace-move-node-to-workspace.adoc[tags=synopsis]
+----
+include::hyprspace-move-node-to-workspace.adoc[tags=purpose]
+include::hyprspace-move-node-to-workspace.adoc[tags=body]
+
+== move-workspace-to-monitor
+----
+include::hyprspace-move-workspace-to-monitor.adoc[tags=synopsis]
+----
+include::hyprspace-move-workspace-to-monitor.adoc[tags=purpose]
+include::hyprspace-move-workspace-to-monitor.adoc[tags=body]
+
+== pin
+----
+include::hyprspace-pin.adoc[tags=synopsis]
+----
+include::hyprspace-pin.adoc[tags=purpose]
+include::hyprspace-pin.adoc[tags=body]
+
+== reload-config
+----
+include::hyprspace-reload-config.adoc[tags=synopsis]
+----
+include::hyprspace-reload-config.adoc[tags=purpose]
+include::hyprspace-reload-config.adoc[tags=body]
+
+== resize
+----
+include::hyprspace-resize.adoc[tags=synopsis]
+----
+include::hyprspace-resize.adoc[tags=purpose]
+include::hyprspace-resize.adoc[tags=body]
+
+== run-callback
+----
+include::hyprspace-run-callback.adoc[tags=synopsis]
+----
+include::hyprspace-run-callback.adoc[tags=purpose]
+include::hyprspace-run-callback.adoc[tags=body]
+
+== split
+----
+include::hyprspace-split.adoc[tags=synopsis]
+----
+include::hyprspace-split.adoc[tags=purpose]
+include::hyprspace-split.adoc[tags=body]
+
+== subscribe
+----
+include::hyprspace-subscribe.adoc[tags=synopsis]
+----
+include::hyprspace-subscribe.adoc[tags=purpose]
+include::hyprspace-subscribe.adoc[tags=body]
+
+== swap
+----
+include::hyprspace-swap.adoc[tags=synopsis]
+----
+include::hyprspace-swap.adoc[tags=purpose]
+include::hyprspace-swap.adoc[tags=body]
+
+== test
+----
+include::hyprspace-test.adoc[tags=synopsis]
+----
+include::hyprspace-test.adoc[tags=purpose]
+include::hyprspace-test.adoc[tags=body]
+
+== test-not
+----
+include::hyprspace-test-not.adoc[tags=synopsis]
+----
+include::hyprspace-test-not.adoc[tags=purpose]
+include::hyprspace-test-not.adoc[tags=body]
+
+
+== summon-workspace
+----
+include::./hyprspace-summon-workspace.adoc[tags=synopsis]
+----
+include::./hyprspace-summon-workspace.adoc[tags=purpose]
+include::./hyprspace-summon-workspace.adoc[tags=body]
+
+== trigger-binding
+----
+include::hyprspace-trigger-binding.adoc[tags=synopsis]
+----
+include::hyprspace-trigger-binding.adoc[tags=purpose]
+include::hyprspace-trigger-binding.adoc[tags=body]
+
+== true
+----
+include::hyprspace-true.adoc[tags=synopsis]
+----
+include::hyprspace-true.adoc[tags=purpose]
+include::hyprspace-true.adoc[tags=body]
+
+== volume
+----
+include::./hyprspace-volume.adoc[tags=synopsis]
+----
+include::./hyprspace-volume.adoc[tags=purpose]
+include::./hyprspace-volume.adoc[tags=body]
+
+== workspace
+----
+include::hyprspace-workspace.adoc[tags=synopsis]
+----
+include::hyprspace-workspace.adoc[tags=purpose]
+include::hyprspace-workspace.adoc[tags=body]
+
+== workspace-back-and-forth
+----
+include::hyprspace-workspace-back-and-forth.adoc[tags=synopsis]
+----
+include::hyprspace-workspace-back-and-forth.adoc[tags=purpose]
+include::hyprspace-workspace-back-and-forth.adoc[tags=body]

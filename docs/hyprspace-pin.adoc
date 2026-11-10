@@ -1,0 +1,33 @@
+= hyprspace-pin(1)
+include::util/man-attributes.adoc[]
+// tag::purpose[]
+:manpurpose: Toggle whether the focused floating window is shown on all workspaces
+// end::purpose[]
+:manname: hyprspace-pin
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace pin [-h|--help] [--window-id <window-id>]
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}.
+
+A pinned window follows the visible workspace of its monitor.
+Only floating windows can be pinned. The command fails for tiling windows.
+// end::body[]
+
+// =========================================================== Options
+include::util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+--window-id <window-id>:: Act on the specified window instead of the focused window
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]

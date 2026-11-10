@@ -1,0 +1,70 @@
+# Hyprland-like config. Bindings follow Hyprland's default hyprland.conf, with 'alt' in place of SUPER
+# (cmd-q, cmd-c, cmd-v and friends are already taken by macOS).
+# Commands are Hyprland dispatchers. Native commands can be mixed in freely.
+
+config-version = 2
+
+# In Hyprland, workspaces are created on demand
+persistent-workspaces = []
+
+# Possible values: dwindle|master|sibling
+new-window-placement = 'dwindle'
+
+# Hyprland's defaults: gaps_in = 5 (on every side of a window), gaps_out = 20
+gaps.inner.horizontal = 10
+gaps.inner.vertical =   10
+gaps.outer.left =       20
+gaps.outer.bottom =     20
+gaps.outer.top =        20
+gaps.outer.right =      20
+
+[mode.main.binding]
+    alt-q = 'exec open -a Terminal'
+    alt-c = 'killactive'
+    alt-v = 'togglefloating'
+    alt-j = 'togglesplit'
+    alt-f = 'fullscreen'
+    alt-p = 'pin'
+
+    # Move focus with alt + arrow keys
+    alt-left =  'movefocus l'
+    alt-right = 'movefocus r'
+    alt-up =    'movefocus u'
+    alt-down =  'movefocus d'
+
+    # Move windows with alt + shift + arrow keys
+    alt-shift-left =  'movewindow l'
+    alt-shift-right = 'movewindow r'
+    alt-shift-up =    'movewindow u'
+    alt-shift-down =  'movewindow d'
+
+    # Switch workspaces with alt + [0-9]
+    alt-1 = 'workspace 1'
+    alt-2 = 'workspace 2'
+    alt-3 = 'workspace 3'
+    alt-4 = 'workspace 4'
+    alt-5 = 'workspace 5'
+    alt-6 = 'workspace 6'
+    alt-7 = 'workspace 7'
+    alt-8 = 'workspace 8'
+    alt-9 = 'workspace 9'
+    alt-0 = 'workspace 10'
+
+    # Move the active window to a workspace with alt + shift + [0-9]
+    alt-shift-1 = 'movetoworkspace 1'
+    alt-shift-2 = 'movetoworkspace 2'
+    alt-shift-3 = 'movetoworkspace 3'
+    alt-shift-4 = 'movetoworkspace 4'
+    alt-shift-5 = 'movetoworkspace 5'
+    alt-shift-6 = 'movetoworkspace 6'
+    alt-shift-7 = 'movetoworkspace 7'
+    alt-shift-8 = 'movetoworkspace 8'
+    alt-shift-9 = 'movetoworkspace 9'
+    alt-shift-0 = 'movetoworkspace 10'
+
+    # Special workspace (scratchpad)
+    alt-s =       'togglespecialworkspace magic'
+    alt-shift-s = 'movetoworkspacesilent special:magic'
+
+    alt-tab =       'cyclenext'
+    alt-shift-tab = 'cyclenext prev'

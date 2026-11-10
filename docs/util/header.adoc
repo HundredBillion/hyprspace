@@ -1,0 +1,11 @@
+====
+HyprSpace is an i3-like tiling window manager for macOS
+
+*Project homepage*: https://github.com/OWNER/hyprspace
+
+image:assets/icon.png[300,300,float="right"]
+
+* xref:guide.adoc[HyprSpace Guide]
+* xref:commands.adoc[HyprSpace Commands]
+* xref:goodies.adoc[HyprSpace Goodies]
+====

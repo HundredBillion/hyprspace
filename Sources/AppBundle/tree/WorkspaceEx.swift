@@ -1,0 +1,67 @@
+import Common
+
+extension Workspace {
+    @MainActor var rootTilingContainer: TilingContainer {
+        let containers = children.filterIsInstance(of: TilingContainer.self)
+        switch containers.count {
+            case 0:
+                let orientation: Orientation = switch config.defaultRootContainerOrientation {
+                    case .horizontal: .h
+                    case .vertical: .v
+                    case .auto: workspaceMonitorInfo.then { $0.width >= $0.height } ? .h : .v
+                }
+                return TilingContainer(parent: self, adaptiveWeight: 1, orientation, config.defaultRootContainerLayout, index: INDEX_BIND_LAST)
+            case 1:
+                return containers.singleOrNil().orDie()
+            default:
+                die("Workspace must contain zero or one tiling container as its child")
+        }
+    }
+
+    @MainActor
+    var floatingWindows: [Window] {
+        floatingWindowsContainer.children.filterIsInstance(of: Window.self)
+    }
+
+    @MainActor
+    var floatingWindowsContainer: FloatingWindowsContainer {
+        let containers = children.filterIsInstance(of: FloatingWindowsContainer.self)
+        return switch containers.count {
+            case 0: FloatingWindowsContainer(parent: self)
+            case 1: containers.singleOrNil().orDie()
+            default: dieT("Workspace must contain zero or one FloatingWindowsContainer")
+        }
+    }
+
+    @MainActor var macOsNativeFullscreenWindowsContainer: MacosFullscreenWindowsContainer {
+        let containers = children.filterIsInstance(of: MacosFullscreenWindowsContainer.self)
+        return switch containers.count {
+            case 0: MacosFullscreenWindowsContainer(parent: self)
+            case 1: containers.singleOrNil().orDie()
+            default: dieT("Workspace must contain zero or one MacosFullscreenWindowsContainer")
+        }
+    }
+
+    @MainActor var macOsNativeHiddenAppsWindowsContainer: MacosHiddenAppsWindowsContainer {
+        let containers = children.filterIsInstance(of: MacosHiddenAppsWindowsContainer.self)
+        return switch containers.count {
+            case 0: MacosHiddenAppsWindowsContainer(parent: self)
+            case 1: containers.singleOrNil().orDie()
+            default: dieT("Workspace must contain zero or one MacosHiddenAppsWindowsContainer")
+        }
+    }
+
+    @MainActor var isVisible: Bool { (parent as? WorkspacesContainer)?.visibleWorkspaceNameOrStale == self.name }
+
+    @MainActor var workspaceMonitorInfo: MonitorInfo { // todo revisit this API (rename)
+        return nodeMonitorInfo.orDie() // todo
+    }
+
+    @MainActor var forceAssignedMonitorInfo: MonitorInfo? {
+        guard let monitorDescriptions = config.workspaceToMonitorForceAssignment[name] else { return nil }
+        let sortedMonitors = globalSortedMonitorInfos
+        return monitorDescriptions.lazy
+            .compactMap { $0.resolveMonitorInfo(sortedMonitors: sortedMonitors) }
+            .first
+    }
+}

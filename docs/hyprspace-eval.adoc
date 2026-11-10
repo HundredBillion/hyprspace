@@ -1,0 +1,48 @@
+= hyprspace-eval(1)
+include::util/man-attributes.adoc[]
+:manname: hyprspace-eval
+// tag::purpose[]
+:manpurpose: Send multiple commands to HyprSpace at once
+// end::purpose[]
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace eval [-h|--help] [--stdin] [--] <hyprspace-shell-expr>
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}
+
+// todo: improve documentation. E.g. eval is more performant then sending multiple commands via CLI
+
+// =========================================================== Options
+include::./util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+
+--stdin::
+Capture CLIs stdin and forward it to `<hyprspace-shell-expr>`.
+If not supplied, stdin is ignored.
+
+// =========================================================== Arguments
+include::./util/conditional-arguments-header.adoc[]
+
+<hyprspace-shell-expr>:: This argument is HyprSpace's shell expression.
+See docs/guide.adoc#shell for more info.
+
+// =========================================================== Examples
+include::util/conditional-examples-header.adoc[]
+
+* Cycle between workspaces a, b, and c: +
+`hyprspace eval 'echo a b c | workspace --wrap-around --stdin next'`
+
+// end::body[]
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]
