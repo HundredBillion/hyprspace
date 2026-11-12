@@ -173,4 +173,19 @@ struct WorkspaceCommandTest {
         assertEquals(result.exitCode.rawValue, 0)
         assertEquals(globalFocus.workspace.name, "b")
     }
+
+    @Test func testNextSkipsSpecialWorkspaces() async {
+        // Alphabetical order: the special workspaces sit between "sp" and "z"
+        assertTrue(Workspace.get(byName: "sp").focusWorkspace())
+        // Non-empty workspaces survive garbage collection
+        TestWindow.new(id: 1, parent: Workspace.get(byName: "special").rootTilingContainer)
+        TestWindow.new(id: 2, parent: Workspace.get(byName: "special-magic").rootTilingContainer)
+        TestWindow.new(id: 3, parent: Workspace.get(byName: "z").rootTilingContainer)
+
+        let result = await parseCommand("workspace next").cmdOrDie.run(.defaultEnv, .emptyStdin)
+        #expect(globalFocus.workspace.name == "z", "\(result.stderr) all: \(Workspace.all.map(\.name))")
+        assertEquals(Workspace.get(byName: "special").isSpecial, true)
+        assertEquals(Workspace.get(byName: "special-magic").isSpecial, true)
+        assertEquals(Workspace.get(byName: "specialist").isSpecial, false)
+    }
 }

@@ -34,6 +34,7 @@ extension TreeNode {
                 for (window, windowRect) in zip(windows, rects) {
                     window.lastAppliedLayoutPhysicalRect = nil
                     window.lastAppliedLayoutVirtualRect = nil
+                    window.lastKnownFloatingRect = windowRect
                     window.layoutFloatingWindow(context, windowRect)
                 }
             case .window(let window):
@@ -43,10 +44,16 @@ extension TreeNode {
                         lastAppliedLayoutPhysicalRect = nil
                         window.layoutFullscreen(context)
                     } else {
+                        // After a mouse drag the window is already where the user left it. Don't animate from the stale rect
+                        let oldRect = window.skipNextAnimation ? nil : lastAppliedLayoutPhysicalRect
+                        window.skipNextAnimation = false
                         lastAppliedLayoutPhysicalRect = physicalRect
                         window.isFullscreen = false
-                        window.setAxFrame(point, CGSize(width: width, height: height))
+                        if oldRect == nil { cancelWindowAnimation(window.windowId) }
+                        window.setAxFrameAnimated(from: oldRect, to: physicalRect)
                     }
+                } else {
+                    window.skipNextAnimation = true
                 }
             case .tilingContainer(let container):
                 lastAppliedLayoutPhysicalRect = physicalRect

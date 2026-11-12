@@ -29,6 +29,8 @@ struct WindowDetectedCallback: Withable, Equatable {
 struct LegacyWindowDetectedCallbackMatcher: Withable, Equatable {
     var appId: String?
     var appNameRegexSubstring: CaseInsensitiveRegex?
+    /// Hyprland's 'class'. Matches either the app bundle ID or the app name
+    var appIdOrNameRegex: CaseInsensitiveRegex?
     var windowTitleRegexSubstring: CaseInsensitiveRegex?
     var workspace: String?
     var duringHyprSpaceStartup: Bool?
@@ -40,6 +42,9 @@ struct LegacyWindowDetectedCallbackMatcher: Withable, Equatable {
         }
         if let appNameRegexSubstring {
             resultParts.append("appNameRegexSubstring=\"\(appNameRegexSubstring.origin)\"")
+        }
+        if let appIdOrNameRegex {
+            resultParts.append("appIdOrNameRegex=\"\(appIdOrNameRegex.origin)\"")
         }
         if let windowTitleRegexSubstring {
             resultParts.append("windowTitleRegexSubstring=\"\(windowTitleRegexSubstring.origin)\"")

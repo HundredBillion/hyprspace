@@ -125,6 +125,13 @@ include::hyprspace-layout.adoc[tags=synopsis]
 include::hyprspace-layout.adoc[tags=purpose]
 include::hyprspace-layout.adoc[tags=body]
 
+== layoutmsg
+----
+include::hyprspace-layoutmsg.adoc[tags=synopsis]
+----
+include::hyprspace-layoutmsg.adoc[tags=purpose]
+include::hyprspace-layoutmsg.adoc[tags=body]
+
 == list-apps
 ----
 include::hyprspace-list-apps.adoc[tags=synopsis]
@@ -245,6 +252,13 @@ include::hyprspace-resize.adoc[tags=synopsis]
 include::hyprspace-resize.adoc[tags=purpose]
 include::hyprspace-resize.adoc[tags=body]
 
+== resizeactive
+----
+include::hyprspace-resizeactive.adoc[tags=synopsis]
+----
+include::hyprspace-resizeactive.adoc[tags=purpose]
+include::hyprspace-resizeactive.adoc[tags=body]
+
 == run-callback
 ----
 include::hyprspace-run-callback.adoc[tags=synopsis]
@@ -294,6 +308,13 @@ include::./hyprspace-summon-workspace.adoc[tags=synopsis]
 ----
 include::./hyprspace-summon-workspace.adoc[tags=purpose]
 include::./hyprspace-summon-workspace.adoc[tags=body]
+
+== togglespecialworkspace
+----
+include::hyprspace-togglespecialworkspace.adoc[tags=synopsis]
+----
+include::hyprspace-togglespecialworkspace.adoc[tags=purpose]
+include::hyprspace-togglespecialworkspace.adoc[tags=body]
 
 == trigger-binding
 ----

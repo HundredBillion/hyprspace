@@ -18,6 +18,24 @@ gaps.outer.bottom =     20
 gaps.outer.top =        20
 gaps.outer.right =      20
 
+# Hyprland: general:border_size, general:col.active_border, decoration:rounding
+border.enabled = true
+border.width = 2
+border.active-color = 'rgba(33ccffee)'
+border.rounding = 10
+
+# Hyprland: animations:enabled
+animations.enabled = true
+animations.duration-ms = 150
+
+# Hyprland-like window rules: 'RULE, MATCHER[, MATCHER]...'
+# Rules: float, tile, pin, fullscreen, workspace <name> [silent]
+# Matchers: class:<regex> (app name or app bundle ID), title:<regex>. The regex must match the full string
+windowrule = [
+    'float, class:^(Calculator)$',
+    'float, class:^(System Settings)$',
+]
+
 [mode.main.binding]
     alt-q = 'exec open -a Terminal'
     alt-c = 'killactive'
@@ -68,3 +86,13 @@ gaps.outer.right =      20
 
     alt-tab =       'cyclenext'
     alt-shift-tab = 'cyclenext prev'
+
+    # Resize the active window with alt + ctrl + arrow keys
+    alt-ctrl-left =  'resizeactive -40 0'
+    alt-ctrl-right = 'resizeactive 40 0'
+    alt-ctrl-up =    'resizeactive 0 -40'
+    alt-ctrl-down =  'resizeactive 0 40'
+
+    # Master layout
+    alt-m =       'layoutmsg swapwithmaster'
+    alt-shift-m = 'layoutmsg focusmaster'

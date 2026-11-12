@@ -161,11 +161,28 @@ final class MacApp: AbstractApp {
         }
     }
 
-    func setAxFrame(_ windowId: OpaqueWindowId, _ topLeft: CGPoint?, _ size: CGSize?) {
+    @MainActor func raiseWithoutFocus(_ windowId: OpaqueWindowId) {
+        if serverArgs.isReadOnly { return }
+        _ = withWindowAsync(windowId, .cancellable) { window, _ in
+            AXUIElementPerformAction(window, kAXRaiseAction as CFString)
+        }
+    }
+
+    /// - Parameter intermediateAnimationStep: the frame is going to be replaced by the next animation step in a moment,
+    ///   so the workaround that sets the size twice is skipped
+    /// - Parameter completion: called on the thread of the app once the app has processed the request
+    func setAxFrame(
+        _ windowId: OpaqueWindowId,
+        _ topLeft: CGPoint?,
+        _ size: CGSize?,
+        intermediateAnimationStep: Bool = false,
+        completion: (@Sendable () -> ())? = nil,
+    ) {
         setFrameJobs.removeValue(forKey: windowId)?.cancel()
         setFrameJobs[windowId] = withWindowAsync(windowId, .cancellable) { [axApp] window, job in
+            defer { completion?() }
             try disableAnimations(app: axApp.threadGuarded, job) {
-                try setFrame(window, topLeft, size, job)
+                try setFrame(window, topLeft, size, job, setSizeTwice: !intermediateAnimationStep)
             }
         }
     }
@@ -471,12 +488,13 @@ private func getAxRect(window: AXUIElement, job: RunLoopJob) throws -> Rect? {
     return Rect(topLeftX: topLeftCorner.x, topLeftY: topLeftCorner.y, width: size.width, height: size.height)
 }
 
-private func setFrame(_ window: AXUIElement, _ topLeft: CGPoint?, _ size: CGSize?, _ job: RunLoopJob) throws {
+private func setFrame(_ window: AXUIElement, _ topLeft: CGPoint?, _ size: CGSize?, _ job: RunLoopJob, setSizeTwice: Bool = true) throws {
     // Set size and then the position. The order is important upstream issue #143
     //                                                        upstream issue #335
     if let size { window.set(Ax.sizeAttr, size) }
     try job.checkCancellation()
     if let topLeft { window.set(Ax.topLeftCornerAttr, topLeft) } else { return }
+    if !setSizeTwice { return }
     try job.checkCancellation()
     if let size { window.set(Ax.sizeAttr, size) }
 }

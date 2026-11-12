@@ -9,7 +9,7 @@ include::util/man-attributes.adoc[]
 == Synopsis
 [verse]
 // tag::synopsis[]
-hyprspace pin [-h|--help] [--window-id <window-id>]
+hyprspace pin [-h|--help] [--window-id <window-id>] [on|off]
 
 // end::synopsis[]
 

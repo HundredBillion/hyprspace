@@ -7,11 +7,6 @@ if ! /bin/test -z "${HYPRSPACE_VERBOSE_BUILD:-}"; then
     set -x # Print shell commands as they are executed (or you can try -v which is less verbose)
 fi
 
-if ! grep -q '^5\.' <<< "$BASH_VERSION"; then
-    echo "Your bash version is too old. Version 5 is the minimum required version" > /dev/stderr
-    exit 1
-fi
-
 add-optional-dep-to-bin() {
     if /usr/bin/which "$1" &> /dev/null; then
         file=".deps/bin/${2:-$1}"
@@ -31,8 +26,11 @@ add-swift-to-bin() {
         >> "$file" /bin/echo "if ! /bin/test -t 1; then export NO_COLOR=1; fi"
         >> "$file" /bin/echo "exec '$(/usr/bin/which swiftly)' run swift \"\$@\""
     else
-        echo "ERROR: swiftly is not installed." > /dev/stderr
-        exit 1
+        # No swiftly: fall back to the Swift toolchain that is shipped with Xcode
+        file=.deps/bin/swift
+        > "$file" /bin/echo "#!/bin/bash"
+        >> "$file" /bin/echo "if ! /bin/test -t 1; then export NO_COLOR=1; fi"
+        >> "$file" /bin/echo "exec /usr/bin/xcrun swift \"\$@\""
     fi
 }
 

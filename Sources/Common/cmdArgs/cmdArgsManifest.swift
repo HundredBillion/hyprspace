@@ -20,6 +20,7 @@ public enum CmdKind: String, CaseIterable, Equatable, Sendable {
     case fullscreen
     case joinWith = "join-with"
     case layout
+    case layoutmsg
     case listApps = "list-apps"
     case listExecEnvVars = "list-exec-env-vars"
     case listModes = "list-modes"
@@ -37,12 +38,14 @@ public enum CmdKind: String, CaseIterable, Equatable, Sendable {
     case pin
     case reloadConfig = "reload-config"
     case resize
+    case resizeactive
     case runCallback = "run-callback"
     case split
     case subscribe
     case summonWorkspace = "summon-workspace"
     case swap
     case test
+    case togglespecialworkspace
     case testNot = "test-not"
     case triggerBinding = "trigger-binding"
 
@@ -125,6 +128,12 @@ func initSubcommands() -> [String: any SubCommandParserProtocol] {
                 result["move-workspace-to-display"] = SubCommandParser(MoveWorkspaceToMonitorCmdArgs.init)
             case .pin:
                 result[kind.rawValue] = SubCommandParser(PinCmdArgs.init)
+            case .layoutmsg:
+                result[kind.rawValue] = SubCommandParser(LayoutMsgCmdArgs.init)
+            case .resizeactive:
+                result[kind.rawValue] = SubCommandParser(ResizeActiveCmdArgs.init)
+            case .togglespecialworkspace:
+                result[kind.rawValue] = SubCommandParser(ToggleSpecialWorkspaceCmdArgs.init)
             case .reloadConfig:
                 result[kind.rawValue] = SubCommandParser(ReloadConfigCmdArgs.init)
             case .resize:

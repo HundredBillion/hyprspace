@@ -53,6 +53,8 @@ struct ReloadConfigResult {
         resetHotKeys()
         config = parseResult.config
         configUrl = result.configUrl
+        resetTimedOutRegexes()
+        resetSlowAnimationApps()
         await activateMode_nonCancellable(activeMode)
         syncStartAtLogin()
         syncFocusFollowsMouse(config)

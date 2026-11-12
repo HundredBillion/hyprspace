@@ -48,15 +48,16 @@ struct DwindlePlacementTest {
         assertEquals(root.layoutDescription, .h_tiles([.window(0), .window(1)]))
     }
 
-    @Test func testSingleTallWindowChangesRootOrientation() async throws {
+    @Test func testSingleWindowKeepsExplicitRootOrientation() async throws {
         let workspace = Workspace.get(byName: name)
         let root = workspace.rootTilingContainer
         let window0 = TestWindow.new(id: 0, parent: root)
         assertEquals(window0.focusWindow(), true)
+        // The window is tall, but the root orientation is the choice of the user. Dwindle must not override it
         window0.lastAppliedLayoutPhysicalRect = rect(width: 1000, height: 1600)
 
         try await detectNewWindow(id: 1, on: workspace)
-        assertEquals(root.layoutDescription, .v_tiles([.window(0), .window(1)]))
+        assertEquals(root.layoutDescription, .h_tiles([.window(0), .window(1)]))
     }
 
     @Test func testSpiral() async throws {

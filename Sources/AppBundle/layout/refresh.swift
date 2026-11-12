@@ -79,7 +79,7 @@ func runLightSession<T>(
 
         updateTrayText()
         SecureInputPanel.shared.refresh()
-        if !event.isFocusFollowsMouse { try await layoutWorkspaces() }
+        if event.isFocusFollowsMouse { refreshFocusBorder() } else { try await layoutWorkspaces() }
         if focusBefore != focusAfter {
             focusAfter?.nativeFocus() // syncFocusToMacOs
         }
@@ -152,6 +152,12 @@ enum OptimalHideCorner {
 
 @MainActor
 private func layoutWorkspaces() async throws {
+    try await layoutWorkspacesWithoutBorder()
+    refreshFocusBorder()
+}
+
+@MainActor
+private func layoutWorkspacesWithoutBorder() async throws {
     if !TrayMenuModel.shared.isEnabled {
         for workspace in Workspace.all {
             workspace.allLeafWindowsRecursive.forEach { ($0 as! MacWindow).unhideFromCorner() } // todo as!

@@ -14,9 +14,10 @@ If you struggle to build HyprSpace locally, you can also refer to [builds in Git
 ## 1. Install dependencies
 
 1.  Install Xcode from App Store https://apps.apple.com/us/app/xcode/id497799835
-2.  Install [swiftly](https://github.com/swiftlang/swiftly).
+2.  *(Optional)* Install [swiftly](https://github.com/swiftlang/swiftly).
     Swiftly is a Swift toolchain manager that will make sure that you use the same swift version as written in `.swift-version` file.
-    `brew install swiftly`
+    `brew install swiftly`.
+    Without swiftly, the build scripts use the Swift toolchain that is shipped with Xcode
 3.  If you want to build shell completion, install rust, bash and fish
     -   Install Rust using rustup. https://www.rust-lang.org/tools/install
     -   `brew install bash fish`

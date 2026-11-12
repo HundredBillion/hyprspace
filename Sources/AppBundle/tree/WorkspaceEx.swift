@@ -65,3 +65,8 @@ extension Workspace {
             .first
     }
 }
+
+extension Workspace {
+    /// Special workspaces (scratchpads) are only reachable with 'togglespecialworkspace' and by their explicit name
+    var isSpecial: Bool { name == specialWorkspaceName || name.hasPrefix(specialWorkspaceName + "-") }
+}

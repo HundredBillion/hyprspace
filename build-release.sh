@@ -25,7 +25,8 @@ done
 build_info_file="$PWD/.build-info.txt"
 printf '%s\n%s\n%s\n' "$build_version" "$(git rev-parse HEAD)" "$(git rev-parse --short HEAD)" > "$build_info_file"
 
-swift_build_cli=(build -c release --arch arm64 --arch x86_64 --product hyprspace)
+# -Osize: the window manager spends its time waiting for other apps, not computing. Smaller binaries are worth more
+swift_build_cli=(build -c release --arch arm64 --arch x86_64 --product hyprspace -Xswiftc -Osize)
 swift "${swift_build_cli[@]}" -Xswiftc -warnings-as-errors \
     -Xlinker -sectcreate \
     -Xlinker __TEXT \
@@ -45,6 +46,11 @@ cd ./xcode
         -derivedDataPath .xcode-build \
         MARKETING_VERSION="$build_version" \
         HYPRSPACE_CODE_SIGN_IDENTITY="$codesign_identity" \
+        SWIFT_OPTIMIZATION_LEVEL=-Osize \
+        DEPLOYMENT_POSTPROCESSING=YES \
+        STRIP_INSTALLED_PRODUCT=YES \
+        STRIP_STYLE=non-global \
+        STRIP_SWIFT_SYMBOLS=YES \
         HYPRSPACE_BUILD_INFO_LDFLAGS="-sectcreate __TEXT __aero_build $build_info_file"
 cd -
 
@@ -57,6 +63,9 @@ xcrun objdump --macho --rpaths --no-leading-headers --arch all .release/hyprspac
     while IFS= read -r rpath; do
         install_name_tool -delete_rpath "$rpath" .release/hyprspace
     done
+
+# More than a half of the unstripped binary is symbols
+strip -rSTx .release/hyprspace
 
 ################
 ### SIGN CLI ###

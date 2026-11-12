@@ -11,7 +11,11 @@ struct PinCommand: Command {
         guard window.isFloating else {
             return .fail(io.err("Only floating windows can be pinned. Tip: use 'layout floating' first"))
         }
-        window.isPinned.toggle()
+        window.isPinned = switch args.toggle {
+            case .on: true
+            case .off: false
+            case .toggle: !window.isPinned
+        }
         return .succ
     }
 }

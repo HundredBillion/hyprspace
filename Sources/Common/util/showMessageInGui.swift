@@ -6,7 +6,8 @@ func showMessageInGui(filenameIfConsoleApp: String, title: String, message: Stri
     if isCli {
         print(titleAndMessage)
     } else {
-        let cachesDir = URL(filePath: "/tmp/dev.hyprspace/")
+        // The temporary directory is private to the current user, unlike /tmp
+        let cachesDir = FileManager.default.temporaryDirectory.appending(component: hyprSpaceAppId)
         Result { try FileManager.default.createDirectory(at: cachesDir, withIntermediateDirectories: true) }.getOrDie()
         let file = cachesDir.appending(component: filenameIfConsoleApp)
         Result { try (titleAndMessage + "\n").write(to: file, atomically: true, encoding: .utf8) }.getOrDie()

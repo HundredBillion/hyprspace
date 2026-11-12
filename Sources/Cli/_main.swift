@@ -24,6 +24,11 @@ struct Main {
             exit(EXIT_CODE_ZERO, out: usage)
         }
 
+        // Never talk to a socket that somebody else could have planted
+        if case .unsafe(let msg) = checkRuntimeDir(getRuntimeDirPath(appId: hyprSpaceAppId), createIfMissing: false) {
+            exit(EXIT_CODE_TWO, err: "Refusing to connect to HyprSpace server. The socket directory is not safe to use: \(msg)")
+        }
+
         if args.first == "--version" || args.first == "-v" {
             let connection = NWConnection(to: NWEndpoint.unix(path: socketPath), using: .tcp)
             let serverVersionAndHash: String?

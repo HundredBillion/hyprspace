@@ -108,6 +108,8 @@ extension NWConnection {
     public func readNonAtomic() async -> Result<Data, NWError> {
         switch await readUInt32() {
             case .success(let count):
+                // The size comes from the other side of the socket. Don't let it allocate gigabytes
+                if Int(count) > maxSocketMessageSize { return .failure(.posix(.EMSGSIZE)) }
                 return await read(bytes: Int(count))
             case .failure(let e):
                 return .failure(e)

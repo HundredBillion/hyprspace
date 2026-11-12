@@ -248,7 +248,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				PRODUCT_BUNDLE_IDENTIFIER = bobko.hyprspace.debug;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.hyprspace.debug;
 				PRODUCT_NAME = "HyprSpace-Debug";
 				SDKROOT = macosx;
 			};
@@ -328,7 +328,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				OTHER_LDFLAGS = "$(inherited) $(HYPRSPACE_BUILD_INFO_LDFLAGS)";
-				PRODUCT_BUNDLE_IDENTIFIER = bobko.hyprspace;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.hyprspace;
 				PRODUCT_NAME = HyprSpace;
 				SDKROOT = macosx;
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;

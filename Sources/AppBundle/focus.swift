@@ -116,6 +116,16 @@ extension Workspace {
 @MainActor private var _prevFocus: FrozenFocus? = nil
 @MainActor var prevFocus: LiveFocus? { _prevFocus?.live.takeIf { $0 != globalFocus } }
 
+/// Hyprland-like: when the focused window is closed, the focus goes back to the window that was focused before it.
+/// Without it, the focus goes to the neighbor of the closed window
+@MainActor func preferPreviouslyFocusedWindow(in workspace: Workspace, closedWindowId: OpaqueWindowId) {
+    if _lastKnownFocus.windowId != closedWindowId { return } // Some other window was closed in the background
+    guard let previous = _prevFocus?.live.windowOrNil, previous.windowId != closedWindowId else { return }
+    if previous.isBound && previous.nodeWorkspace == workspace {
+        previous.markAsMostRecentChild()
+    }
+}
+
 @MainActor private var onFocusChangedRecursionGuard = false
 // Should be called in refreshSession
 @MainActor func checkOnFocusChangedCallbacks_nonCancellable() async {

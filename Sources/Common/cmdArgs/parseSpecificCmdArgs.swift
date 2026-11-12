@@ -1,3 +1,5 @@
+// The function is big. Without the attribute, the compiler creates a separate copy of it for every command (~200 KB)
+@_semantics("optimize.sil.specialize.generic.never")
 func parseSpecificCmdArgs<T: CmdArgs>(_ raw: T, _ args: StrArrSlice) -> ParsedCmd<T> {
     var raw = raw
     var errors: [String] = []
@@ -91,5 +93,5 @@ extension ArgParserProtocol where Root: Withable {
 
 private func isResizeNegativeUnitsArg(_ raw: any CmdArgs, arg: String) -> Bool {
     var iter = arg.makeIterator()
-    return raw is ResizeCmdArgs && iter.next() == "-" && iter.next()?.isNumber == true
+    return (raw is ResizeCmdArgs || raw is ResizeActiveCmdArgs || raw is LayoutMsgCmdArgs) && iter.next() == "-" && iter.next()?.isNumber == true
 }

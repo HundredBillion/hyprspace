@@ -72,7 +72,16 @@ hyprspace -h;
     | move-workspace-to-monitor [--wrap-around] (left|down|up|right|next|prev) [--wrap-around]
     | move-workspace-to-monitor [--wrap-around] <monitor_pattern>... [--wrap-around]
 
-    | pin [--window-id <window_id>]
+    | layoutmsg (swapwithmaster|focusmaster|togglesplit|cyclenext|cycleprev|swapnext|swapprev)
+    | layoutmsg mfact <number>
+    | layoutmsg mfact exact <number>
+
+    | resizeactive <number> <number>
+    | resizeactive exact <number> <number>
+
+    | togglespecialworkspace [<workspace>]
+
+    | pin [--window-id <window_id>] [on|off]
 
     | reload-config [--no-gui | --dry-run]...
 

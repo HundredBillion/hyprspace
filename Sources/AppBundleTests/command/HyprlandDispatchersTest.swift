@@ -14,13 +14,11 @@ struct HyprlandDispatchersTest {
         testParseSingleCommandSucc("movefocus l", FocusCmdArgs(rawArgs: [], cardinalOrDfsDirection: .direction(.left)))
         testParseSingleCommandSucc("movefocus right", FocusCmdArgs(rawArgs: [], cardinalOrDfsDirection: .direction(.right)))
         testParseSingleCommandSucc("movetoworkspacesilent 5", MoveNodeToWorkspaceCmdArgs(workspace: "5"))
+        testParseSingleCommandSucc("movetoworkspace special:music", MoveNodeToWorkspaceCmdArgs(workspace: "special-music"))
+        // Only 'special' and 'special:<name>' are special workspaces
         testParseSingleCommandSucc(
-            "togglespecialworkspace",
-            WorkspaceCmdArgs(target: .direct(.parse("special").getOrDie()), autoBackAndForth: true),
-        )
-        testParseSingleCommandSucc(
-            "togglespecialworkspace music",
-            WorkspaceCmdArgs(target: .direct(.parse("special-music").getOrDie()), autoBackAndForth: true),
+            "movetoworkspace specialist",
+            MoveNodeToWorkspaceCmdArgs(workspace: "specialist").with(\.focusFollowsWindow, true),
         )
         #expect(parseCommand("killactive").errorOrNil == nil)
         #expect(parseCommand("togglefloating").errorOrNil == nil)
@@ -58,16 +56,5 @@ struct HyprlandDispatchersTest {
         await parseCommand("movetoworkspace 7").cmdOrDie.run(.defaultEnv, .emptyStdin)
         assertEquals(globalFocus.workspace.name, "7")
         assertEquals(globalFocus.windowOrNil?.windowId, 1)
-    }
-
-    @Test func testToggleSpecialWorkspace() async {
-        let original = globalFocus.workspace.name
-        // The previously focused workspace is recorded by the refresh session that follows every command in the real app
-        await checkOnFocusChangedCallbacks_nonCancellable()
-        await parseCommand("togglespecialworkspace").cmdOrDie.run(.defaultEnv, .emptyStdin)
-        assertEquals(globalFocus.workspace.name, "special")
-        await checkOnFocusChangedCallbacks_nonCancellable()
-        await parseCommand("togglespecialworkspace").cmdOrDie.run(.defaultEnv, .emptyStdin)
-        assertEquals(globalFocus.workspace.name, original)
     }
 }

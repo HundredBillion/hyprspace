@@ -10,51 +10,18 @@ You can skip parts that are obvious.
 [#installation]
 == Installation
 
-[#homebrew-installation]
-=== Homebrew installation (Preferred)
-
-https://brew.sh/[Homebrew] is a package manager for macOS
+HyprSpace doesn't have a packaged release yet. Build it from sources. The only requirement is Xcode.
 
 [source,bash]
 ----
-brew install --cask OWNER/tap/hyprspace
+./build-debug.sh
 ----
 
-*(Optional)* You might need to configure your shell to enable completion provided by homebrew packages: https://docs.brew.sh/Shell-Completion
-HyprSpace provides bash, fish and zsh completions.
+The script produces two binaries:
 
-You can also install specific previous https://github.com/nikitabobko/homebrew-tap/tree/main/Casks[pinned homebrew Casks versions]:
-[source,bash]
-----
-brew install --cask OWNER/tap/hyprspace@0.12.0
-----
-
-[#manual-installation]
-=== Manual installation
-
-. Download the latest available zip from https://github.com/OWNER/hyprspace/releases[releases page]
-. Unpack zip
-. Put unpacked `HyprSpace-v$VERSION/HyprSpace.app` to `/Applications`
-. Put unpacked `HyprSpace-v$VERSION/bin/hyprspace` anywhere to `$PATH`
-(The step is optional. It is only needed if you want to be able to interact with HyprSpace from CLI)
-
-If you see this message
-
-----
-"HyprSpace.app" can't be opened because Apple cannot check it for malicious software.
-----
-
-**Option 1** to resolve the problem
-
-```
-xattr -d com.apple.quarantine /Applications/HyprSpace.app
-```
-
-**Option 2** to resolve the problem
-
-. navigate in Finder to `/Applications/HyprSpace.app`
-. Right mouse click
-. Open (yes, it's that stupid)
+* `.debug/HyprSpaceApp` is the window manager itself. Run it from a terminal.
+On the first run, macOS asks to grant the Accessibility permission to the terminal
+* `.debug/hyprspace` is the CLI client. Put it anywhere to `$PATH` if you want to interact with HyprSpace from CLI
 
 [#configuring-hyprspace]
 == Configuring HyprSpace
@@ -837,9 +804,13 @@ HyprSpace listens on a Unix-domain stream socket:
 
 [source]
 ----
-/tmp/bobko.hyprspace-${USER}.sock        # HyprSpace.app (release builds)
-/tmp/bobko.hyprspace.debug-${USER}.sock  # HyprSpace-Debug.app (debug builds only)
+/tmp/dev.hyprspace-${USER}/hyprspace.sock        # HyprSpace.app (release builds)
+/tmp/dev.hyprspace.debug-${USER}/hyprspace.sock  # HyprSpace-Debug.app (debug builds only)
 ----
+
+The directory that contains the socket is only accessible by the current user.
+Both the server and the CLI client refuse to use the directory if it is a symlink, if it is owned by another user,
+or if other users can access it.
 
 `${USER}` is the result of `NSUserName()` in Swift (typically equivalent to `$USER` / `id -un` / `whoami` in shell).
 
@@ -975,7 +946,7 @@ A minimal Python client that runs `hyprspace list-workspaces --focused`:
 import getpass, json, socket, struct
 
 SOCKET_PROTOCOL_VERSION = 1
-sock_path = f"/tmp/bobko.hyprspace-{getpass.getuser()}.sock"
+sock_path = f"/tmp/dev.hyprspace-{getpass.getuser()}/hyprspace.sock"
 
 def send_frame(s, payload):
     s.sendall(struct.pack("<I", len(payload)) + payload)

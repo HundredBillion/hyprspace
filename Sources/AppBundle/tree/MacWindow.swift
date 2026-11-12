@@ -25,18 +25,16 @@ final class MacWindow: Window {
     static func getOrRegister(windowId: OpaqueWindowId, macApp: MacApp) async throws -> MacWindow {
         if let existing = allWindowsMap[windowId] { return existing }
         let rect = try await macApp.getAxRect(windowId, .cancellable)
-        let data = try await unbindAndGetBindingDataForNewWindow(
-            windowId,
-            macApp,
-            isStartup
-                ? (rect?.center.monitorApproximation ?? mainMonitorInfo).visibleWorkspace
-                : globalFocus.workspace,
-            window: nil,
-            .cancellable,
-        )
+        let workspace = isStartup
+            ? (rect?.center.monitorApproximation ?? mainMonitorInfo).visibleWorkspace
+            : globalFocus.workspace
+        let windowLevel = try await macApp.getWindowLevel(windowId, .cancellable)
+        let windowType = try await macApp.getAxUiElementWindowType(windowId, windowLevel, .cancellable)
 
         // atomic synchronous section
         if let existing = allWindowsMap[windowId] { return existing }
+        // Computing the binding data may restructure the tree, that's why it must stay inside the atomic section
+        let data = unbindAndGetBindingData(windowType, workspace, window: nil)
         let window = MacWindow(windowId, macApp, lastFloatingSize: rect?.size, parent: data.parent, adaptiveWeight: data.adaptiveWeight, index: data.index)
         allWindowsMap[windowId] = window
 
@@ -93,6 +91,7 @@ final class MacWindow: Window {
         if !skipClosedWindowsCache { cacheClosedWindowIfNeeded() }
         let parent = unbindFromParent().parent
         let deadWindowWorkspace = parent.nodeWorkspace
+        if let deadWindowWorkspace { preferPreviouslyFocusedWindow(in: deadWindowWorkspace, closedWindowId: windowId) }
         let focus = globalFocus
         if let deadWindowWorkspace, deadWindowWorkspace == focus.workspace ||
             deadWindowWorkspace == prevFocusedWorkspace && prevFocusedWorkspaceDate.distance(to: .now) < 1
@@ -198,6 +197,14 @@ final class MacWindow: Window {
         self.prevUnhiddenProportionalPositionInsideWorkspaceRect = nil
     }
 
+    @MainActor override func forgetHiddenInCornerPosition() {
+        prevUnhiddenProportionalPositionInsideWorkspaceRect = nil
+    }
+
+    @MainActor override func raiseWithoutFocus() {
+        macApp.raiseWithoutFocus(windowId)
+    }
+
     override var isHiddenInCorner: Bool {
         prevUnhiddenProportionalPositionInsideWorkspaceRect != nil
     }
@@ -206,8 +213,13 @@ final class MacWindow: Window {
         try await macApp.getAxSize(windowId, cm)
     }
 
-    override func setAxFrame(_ topLeft: CGPoint?, _ size: CGSize?) {
+    @MainActor override func setAxFrame(_ topLeft: CGPoint?, _ size: CGSize?) {
+        cancelWindowAnimation(windowId) // An explicit frame always wins over a running animation
         macApp.setAxFrame(windowId, topLeft, size)
+    }
+
+    @MainActor override func setAxFrameForAnimationStep(_ topLeft: CGPoint?, _ size: CGSize?, isIntermediate: Bool, completion: @escaping @Sendable () -> ()) {
+        macApp.setAxFrame(windowId, topLeft, size, intermediateAnimationStep: isIntermediate, completion: completion)
     }
 
     override func getAxRect(_ cm: CancellationMode) async throws -> Rect? {
@@ -229,7 +241,13 @@ extension Window {
 @MainActor
 private func unbindAndGetBindingDataForNewWindow(_ windowId: OpaqueWindowId, _ macApp: MacApp, _ workspace: Workspace, window: Window?, _ cm: CancellationMode) async throws -> BindingData {
     let windowLevel = try await macApp.getWindowLevel(windowId, cm)
-    return switch try await macApp.getAxUiElementWindowType(windowId, windowLevel, cm) {
+    return unbindAndGetBindingData(try await macApp.getAxUiElementWindowType(windowId, windowLevel, cm), workspace, window: window)
+}
+
+// The function is private because it's unsafe. It leaves the window in unbound state
+@MainActor
+private func unbindAndGetBindingData(_ windowType: AxUiElementWindowType, _ workspace: Workspace, window: Window?) -> BindingData {
+    switch windowType {
         case .popup: BindingData(parent: macosPopupWindowsContainer, adaptiveWeight: WEIGHT_AUTO, index: INDEX_BIND_LAST)
         case .dialog: BindingData(parent: workspace.floatingWindowsContainer, adaptiveWeight: WEIGHT_AUTO, index: INDEX_BIND_LAST)
         case .window: unbindAndGetBindingDataForNewTilingWindow(workspace, window: window)
@@ -246,6 +264,9 @@ private func unbindAndGetBindingDataForNewTilingWindow(_ workspace: Workspace, w
     if let (tilingParent, index) = workspace.mostRecentWindowRecursive?.nearestAliveTilingParent() {
         return switch config.newWindowPlacement {
             case .sibling: BindingData(parent: tilingParent, adaptiveWeight: WEIGHT_AUTO, index: index + 1)
+            // On startup, the sizes of the windows are not known yet. Dozens of already opened windows would be
+            // nested into a deep spiral, so they are laid out flat instead
+            case .dwindle where isStartup: BindingData(parent: tilingParent, adaptiveWeight: WEIGHT_AUTO, index: index + 1)
             case .dwindle: getDwindleBindingData(parent: tilingParent, splitTargetIndex: index)
             case .master: dieT("Master placement is handled above")
         }
@@ -269,9 +290,9 @@ private func getDwindleBindingData(parent: TilingContainer, splitTargetIndex ind
     // The rect is unknown if the target hasn't been laid out yet (e.g. several windows are detected at once)
     let splitOrientation: Orientation? = target.lastAppliedLayoutPhysicalRect.map { $0.width > $0.height ? .h : .v }
 
-    // The only window in the workspace. The root container can be reused as is
+    // The only window in the workspace. The root container is reused as is: its orientation comes from
+    // 'default-root-container-orientation' or from an explicit 'layout' command, and dwindle must not override it
     if parent.isRootContainer && parent.inhabitedChildren.count <= 1 {
-        if let splitOrientation { parent.changeOrientation(splitOrientation) }
         return sibling
     }
 
@@ -355,7 +376,8 @@ func onWindowDetected(_ env: CmdEnv, _ io: CmdIo, _ window: Window) async -> Int
         appName: window.app.name,
     ))
     var lastExitCode = Int32ExitCode.succ
-    for callback in config.onWindowDetected where await callback.matches(window) {
+    let titleCache = WindowTitleCache()
+    for callback in config.windowRules + config.onWindowDetected where await callback.matches(window, titleCache: titleCache) {
         lastExitCode = await callback.run.run(env.withWindowId(window.windowId), io)
         if !callback.checkFurtherCallbacks {
             return lastExitCode
@@ -364,25 +386,66 @@ func onWindowDetected(_ env: CmdEnv, _ io: CmdIo, _ window: Window) async -> Int
     return lastExitCode
 }
 
+/// Regexes from the config that turned out to be too slow. They are not evaluated anymore until the config is reloaded
+@MainActor private var timedOutRegexes: Set<String> = []
+let regexTimeoutMs = 250
+/// Window titles are controlled by other apps and by web pages. Nobody needs to match megabytes of a title
+let maxRegexInputLength = 2000
+
+@MainActor func resetTimedOutRegexes() { timedOutRegexes = [] }
+
+/// Window managers must not hang because of a regex. See ``String.contains(caseInsensitiveRegex:timeoutMs:)``
+@MainActor
+func containsWithTimeout(_ string: String, _ regex: CaseInsensitiveRegex) async -> Bool {
+    if timedOutRegexes.contains(regex.origin) { return false }
+    let input = string.count > maxRegexInputLength ? String(string.prefix(maxRegexInputLength)) : string
+    if let result = await input.contains(caseInsensitiveRegex: regex, timeoutMs: regexTimeoutMs) {
+        return result
+    }
+    timedOutRegexes.insert(regex.origin)
+    eprint("The regex '\(regex.origin)' didn't finish in \(regexTimeoutMs)ms. It is ignored until the config is reloaded")
+    return false
+}
+
+/// Fetches the title of the window at most once, no matter how many callbacks need it
+@MainActor
+final class WindowTitleCache {
+    private var title: String?? = nil
+
+    func get(_ window: Window) async -> String? {
+        if let title { return title }
+        let fetched = try? await window.getTitle(.nonCancellable)
+        title = .some(fetched)
+        return fetched
+    }
+}
+
 extension WindowDetectedCallback {
     @MainActor
-    func matches(_ window: Window) async -> Bool {
+    func matches(_ window: Window, titleCache: WindowTitleCache = WindowTitleCache()) async -> Bool {
         switch self.matcher {
             case .legacy(let matcher):
                 if let startupMatcher = matcher.duringHyprSpaceStartup, startupMatcher != isStartup {
                     return false
                 }
-                if let regex = matcher.windowTitleRegexSubstring, (try? await window.getTitle(.nonCancellable))?.contains(caseInsensitiveRegex: regex) != true {
+                if let regex = matcher.appIdOrNameRegex,
+                   !(await containsWithTimeout(window.app.rawAppBundleId ?? "", regex)),
+                   !(await containsWithTimeout(window.app.name ?? "", regex))
+                {
                     return false
                 }
                 if let appId = matcher.appId, appId != window.app.rawAppBundleId {
                     return false
                 }
-                if let regex = matcher.appNameRegexSubstring, !(window.app.name ?? "").contains(caseInsensitiveRegex: regex) {
+                if let regex = matcher.appNameRegexSubstring, !(await containsWithTimeout(window.app.name ?? "", regex)) {
                     return false
                 }
                 if let workspace = matcher.workspace, workspace != window.nodeWorkspace?.name {
                     return false
+                }
+                // The title is checked last, because fetching it is a slow request to the app
+                if let regex = matcher.windowTitleRegexSubstring {
+                    guard let title = await titleCache.get(window), await containsWithTimeout(title, regex) else { return false }
                 }
                 return true
             case .command(let command):

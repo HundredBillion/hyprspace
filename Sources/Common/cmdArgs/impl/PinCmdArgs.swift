@@ -7,6 +7,8 @@ public struct PinCmdArgs: CmdArgs {
         flags: [
             "--window-id": windowIdSubArgParser(),
         ],
-        posArgs: [],
+        posArgs: [ArgParser(\.toggle, parseToggleEnum)],
     )
+
+    public var toggle: ToggleEnum = .toggle
 }

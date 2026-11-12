@@ -2,7 +2,46 @@ import AppKit
 import Darwin
 import Foundation
 
-public let socketPath = "/tmp/\(hyprSpaceAppId)-\(unixUserName).sock"
+public let socketPath = getSocketPath(appId: hyprSpaceAppId)
+
+/// The socket lives in a directory that only the current user can access. A bare socket file in /tmp could be
+/// pre-created by another local user, who would then receive the commands of the CLI client
+public func getRuntimeDirPath(appId: String) -> String { "/tmp/\(appId)-\(unixUserName)" }
+public func getSocketPath(appId: String) -> String { getRuntimeDirPath(appId: appId) + "/hyprspace.sock" }
+
+public enum RuntimeDirStatus: Equatable, Sendable {
+    case ok
+    case missing
+    case unsafe(String)
+}
+
+/// Makes sure that the directory is a real directory (not a symlink), that it's owned by the current user,
+/// and that nobody else can access it
+public func checkRuntimeDir(_ path: String, createIfMissing: Bool) -> RuntimeDirStatus {
+    if unsafe createIfMissing && mkdir(path, 0o700) != 0 && errno != EEXIST {
+        return .unsafe("Can't create '\(path)' (errno \(errno))")
+    }
+    var info = stat()
+    if unsafe lstat(path, &info) != 0 {
+        return errno == ENOENT ? .missing : .unsafe("Can't inspect '\(path)' (errno \(errno))")
+    }
+    if info.st_mode & S_IFMT != S_IFDIR {
+        return .unsafe("'\(path)' is not a directory")
+    }
+    if info.st_uid != getuid() {
+        return .unsafe("'\(path)' is owned by another user")
+    }
+    if info.st_mode & 0o077 != 0 {
+        // The directory is ours, so it's safe to tighten the permissions
+        if unsafe !createIfMissing || chmod(path, 0o700) != 0 {
+            return .unsafe("'\(path)' is accessible by other users")
+        }
+    }
+    return .ok
+}
+
+/// A single message between the CLI client and the server can't be bigger than that
+public let maxSocketMessageSize = 64 * 1024 * 1024
 public let unixUserName = NSUserName()
 public let mainModeId = "main"
 

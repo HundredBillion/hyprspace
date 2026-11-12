@@ -72,6 +72,10 @@ let layout_help_generated = """
                   (<target-layout>)...
        OR: layout [-h|--help] --for-next-detected-window (tiling|floating)
     """
+let layoutmsg_help_generated = """
+    USAGE: layoutmsg [-h|--help] (swapwithmaster|focusmaster|togglesplit|cyclenext|cycleprev|swapnext|swapprev)
+       OR: layoutmsg [-h|--help] mfact (<delta>|exact <ratio>)
+    """
 let list_apps_help_generated = """
     USAGE: list-apps [-h|--help] [--macos-native-hidden [no]] [--format <output-format>] [--count] [--json]
     """
@@ -135,13 +139,16 @@ let move_help_generated = """
                 [--fail-if-macos-native-fullscreen] (left|down|up|right)
     """
 let pin_help_generated = """
-    USAGE: pin [-h|--help] [--window-id <window-id>]
+    USAGE: pin [-h|--help] [--window-id <window-id>] [on|off]
     """
 let reload_config_help_generated = """
     USAGE: reload-config [-h|--help] [--no-gui] [--dry-run] [--warnings-as-errors]
     """
 let resize_help_generated = """
     USAGE: resize [-h|--help] [--window-id <window-id>] (smart|smart-opposite|width|height) [+|-]<number>
+    """
+let resizeactive_help_generated = """
+    USAGE: resizeactive [-h|--help] [exact] <x> <y>
     """
 let run_callback_help_generated = """
     USAGE: run-callback [-h|--help] [--for-every-window|--window-id <window-id>] on-window-detected
@@ -167,6 +174,9 @@ let test_not_help_generated = """
 let test_help_generated = """
     USAGE: test [-h|--help] <lhs> = <rhs>
        OR: test [-h|--help] <lhs> ~= <rhs>
+    """
+let togglespecialworkspace_help_generated = """
+    USAGE: togglespecialworkspace [-h|--help] [<name>]
     """
 let trigger_binding_help_generated = """
     USAGE: trigger-binding [-h|--help] --mode <mode-id> [--] <binding>

@@ -10,6 +10,13 @@ func movedObs(_: AXObserver, ax: AXUIElement, notif: CFString, _: UnsafeMutableR
     let pid = ax.pid
     Task.startUnstructured { @MainActor in
         guard let token: RunSessionGuard = .isServerEnabled else { return }
+        // The window animation moves and resizes windows many times in a row. Those notifications are our own echo.
+        // The notification that follows the last animation step still triggers the refresh
+        if let nativeWindowId, let pid, let window = Window.get(byNativeId: nativeWindowId, pid: pid),
+           animatedRect(of: window.windowId) != nil
+        {
+            return
+        }
         guard let nativeWindowId,
               let pid,
               let window = Window.get(byNativeId: nativeWindowId, pid: pid),

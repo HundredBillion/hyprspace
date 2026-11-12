@@ -41,10 +41,10 @@ targets:
       configs:
         Debug:
           PRODUCT_NAME: HyprSpace-Debug
-          PRODUCT_BUNDLE_IDENTIFIER: bobko.hyprspace.debug
+          PRODUCT_BUNDLE_IDENTIFIER: dev.hyprspace.debug
         Release:
           PRODUCT_NAME: HyprSpace
-          PRODUCT_BUNDLE_IDENTIFIER: bobko.hyprspace
+          PRODUCT_BUNDLE_IDENTIFIER: dev.hyprspace
           SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
           GCC_TREAT_WARNINGS_AS_ERRORS: YES
           OTHER_LDFLAGS: $(inherited) $(HYPRSPACE_BUILD_INFO_LDFLAGS)

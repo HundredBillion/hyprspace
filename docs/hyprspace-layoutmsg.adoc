@@ -1,0 +1,40 @@
+= hyprspace-layoutmsg(1)
+include::util/man-attributes.adoc[]
+// tag::purpose[]
+:manpurpose: Send a message to the dwindle or master layout
+// end::purpose[]
+:manname: hyprspace-layoutmsg
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace layoutmsg [-h|--help] (swapwithmaster|focusmaster|togglesplit|cyclenext|cycleprev|swapnext|swapprev)
+hyprspace layoutmsg [-h|--help] mfact (<delta>|exact <ratio>)
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}.
+
+The master is the first window of the workspace. All the other windows are the stack.
+
+* `swapwithmaster` swaps the focused window with the master. If the master is focused, it is swapped with the first window of the stack
+* `focusmaster` focuses the master
+* `mfact <delta>` changes the share of the workspace that the master takes, for example `mfact 0.05` or `mfact -0.05`
+* `mfact exact <ratio>` sets the share of the master. `<ratio>` is a number between 0.0 and 1.0
+* `togglesplit` toggles the orientation of the split that the focused window belongs to
+* `cyclenext`, `cycleprev` focus the next or the previous window
+* `swapnext`, `swapprev` swap the focused window with the next or the previous window
+// end::body[]
+
+// =========================================================== Options
+include::util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]

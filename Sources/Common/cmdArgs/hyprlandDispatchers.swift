@@ -35,14 +35,12 @@ func translateHyprlandDispatcher(_ args: [String]) -> ResOrStr<[String]>? {
         case "togglefloating": noParams(["layout", "floating", "tiling"])
         case "togglesplit": noParams(["layout", "horizontal", "vertical"])
         case "focuscurrentorlast": noParams(["focus-back-and-forth"])
-        case "movetoworkspace": workspace(["move-node-to-workspace", "--focus-follows-window"])
+        case "movetoworkspace":
+            // A window that is moved to a special workspace is hidden until 'togglespecialworkspace'
+            params.singleOrNil().map { $0 == specialWorkspaceName || $0.hasPrefix(specialWorkspaceName + ":") } == true
+                ? workspace(["move-node-to-workspace"])
+                : workspace(["move-node-to-workspace", "--focus-follows-window"])
         case "movetoworkspacesilent": workspace(["move-node-to-workspace"])
-        case "togglespecialworkspace":
-            switch params.count {
-                case 0: .success(["workspace", "--auto-back-and-forth", specialWorkspaceName])
-                case 1: .success(["workspace", "--auto-back-and-forth", hyprlandWorkspaceName("special:" + params[0])])
-                default: .failure("\(dispatcher): expected at most one argument: [<name>]")
-            }
         case "cyclenext":
             switch params {
                 case []: .success(["focus", "--boundaries-action", "wrap-around-the-workspace", "dfs-next"])
@@ -56,6 +54,6 @@ func translateHyprlandDispatcher(_ args: [String]) -> ResOrStr<[String]>? {
 public let specialWorkspaceName = "special"
 
 /// Hyprland: 'special' and 'special:name'. Colon is replaced, because it's not a nice character for workspace names
-private func hyprlandWorkspaceName(_ raw: String) -> String {
+public func hyprlandWorkspaceName(_ raw: String) -> String {
     raw.hasPrefix("special:") ? specialWorkspaceName + "-" + raw.dropFirst("special:".count) : raw
 }

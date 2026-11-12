@@ -1,0 +1,35 @@
+= hyprspace-resizeactive(1)
+include::util/man-attributes.adoc[]
+// tag::purpose[]
+:manpurpose: Resize the focused window by the given amount of pixels
+// end::purpose[]
+:manname: hyprspace-resizeactive
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace resizeactive [-h|--help] [exact] <x> <y>
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}.
+
+`<x>` changes the width, `<y>` changes the height. Negative numbers shrink the window. Zero keeps the dimension as is.
+
+With `exact`, `<x>` and `<y>` are the new width and height instead of the difference.
+
+The command only supports tiling windows.
+// end::body[]
+
+// =========================================================== Options
+include::util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]

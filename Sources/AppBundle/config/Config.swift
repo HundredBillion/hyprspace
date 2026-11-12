@@ -52,6 +52,8 @@ struct Config: Withable {
     var keyMapping = KeyMapping()
     var execConfig: ExecConfig = ExecConfig()
     var focusFollowsMouse: FocusFollowsMouse = FocusFollowsMouse()
+    var border: BorderConfig = BorderConfig()
+    var animations: AnimationsConfig = AnimationsConfig()
 
     var onFocusChanged: Shell<any Command> = .empty
     // var onFocusedWorkspaceChanged: [any Command] = []
@@ -61,11 +63,57 @@ struct Config: Withable {
     var workspaceToMonitorForceAssignment: [String: [MonitorDescription]] = [:]
     var modes: [String: Mode] = [:]
     var onWindowDetected: [WindowDetectedCallback] = []
+    var windowRules: [WindowDetectedCallback] = []
     var onModeChanged: Shell<any Command> = .empty
 }
 
 struct FocusFollowsMouse: Withable {
     var enabled: Bool = false
+}
+
+/// Border around the focused window. Hyprland: general:border_size, general:col.active_border, decoration:rounding
+struct BorderConfig: Withable, Equatable {
+    var enabled: Bool = true
+    var width: Int = 2
+    var activeColor: RgbaColor = RgbaColor(red: 0x33 / 255.0, green: 0xcc / 255.0, blue: 0xff / 255.0, alpha: 0xee / 255.0)
+    var rounding: Int = 10
+}
+
+/// Hyprland: animations:enabled
+struct AnimationsConfig: Withable, Equatable {
+    var enabled: Bool = true
+    var durationMs: Int = 150
+}
+
+struct RgbaColor: Equatable {
+    var red: Double
+    var green: Double
+    var blue: Double
+    var alpha: Double
+
+    /// Supported formats: '#rrggbb', '#rrggbbaa', 'rgb(rrggbb)', 'rgba(rrggbbaa)', '0xaarrggbb'
+    static func parse(_ raw: String) -> RgbaColor? {
+        let str = raw.trim().lowercased()
+        func hex(_ str: Substring) -> [Double]? {
+            guard str.count == 6 || str.count == 8, str.allSatisfy({ $0.isASCII && $0.isHexDigit }) else { return nil }
+            let chars = Array(str)
+            return stride(from: 0, to: chars.count, by: 2).map { Double(UInt8(String(chars[$0 ... $0 + 1]), radix: 16) ?? 0) / 255.0 }
+        }
+        let components: [Double]? // r, g, b, [a]
+        if str.hasPrefix("#") {
+            components = hex(str.dropFirst())
+        } else if str.hasPrefix("rgba("), str.hasSuffix(")"), str.count == "rgba()".count + 8 {
+            components = hex(str.dropFirst("rgba(".count).dropLast())
+        } else if str.hasPrefix("rgb("), str.hasSuffix(")"), str.count == "rgb()".count + 6 {
+            components = hex(str.dropFirst("rgb(".count).dropLast())
+        } else if str.hasPrefix("0x"), str.count == 10 {
+            components = hex(str.dropFirst(2)).map { [$0[1], $0[2], $0[3], $0[0]] } // aarrggbb
+        } else {
+            components = nil
+        }
+        guard let components else { return nil }
+        return RgbaColor(red: components[0], green: components[1], blue: components[2], alpha: components.getOrNil(atIndex: 3) ?? 1)
+    }
 }
 
 enum ConfigVersion: Int, Comparable, CaseIterable, Sendable, CustomStringConvertible {

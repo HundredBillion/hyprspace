@@ -92,6 +92,11 @@ open class TreeNode: Equatable, AeroAny {
         }
         newParent._children.insert(self, at: index != INDEX_BIND_LAST ? index : newParent._children.count)
         _parent = newParent
+        if !(newParent is FloatingWindowsContainer), let window = self as? Window {
+            // Pinning and special workspaces only make sense for floating windows
+            window.isPinned = false
+            window.shownSpecialWorkspace = nil
+        }
         unboundStacktrace = nil
         // todo consider disabling automatic mru propogation
         // 1. "floating windows" in FocusCommand break the MRU because of that :(

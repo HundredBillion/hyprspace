@@ -1,0 +1,34 @@
+= hyprspace-togglespecialworkspace(1)
+include::util/man-attributes.adoc[]
+// tag::purpose[]
+:manpurpose: Show or hide a special workspace (scratchpad) on top of the current workspace
+// end::purpose[]
+:manname: hyprspace-togglespecialworkspace
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace togglespecialworkspace [-h|--help] [<name>]
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}.
+
+The windows of the special workspace are shown as floating windows on top of the current workspace.
+They stay on the screen when you switch workspaces, until the special workspace is toggled off.
+
+Move a window to the special workspace with `movetoworkspacesilent special` (or `special:<name>` for a named one).
+// end::body[]
+
+// =========================================================== Options
+include::util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]

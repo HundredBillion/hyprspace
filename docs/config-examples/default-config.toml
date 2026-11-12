@@ -71,6 +71,19 @@ focus-follows-mouse.enabled = false
 # See docs/guide.adoc#key-mapping
 key-mapping.preset = 'qwerty'
 
+# Border around the focused window
+# 'active-color' formats: '#rrggbb', '#rrggbbaa', 'rgb(rrggbb)', 'rgba(rrggbbaa)', '0xaarrggbb'
+# 'rounding' should match the corner radius of macOS windows
+border.enabled = true
+border.width = 2
+border.active-color = '#33ccffee'
+border.rounding = 10
+
+# Window animations. Windows glide to their new position when the layout changes
+# Set 'animations.enabled = false' if windows of some apps feel sluggish
+animations.enabled = true
+animations.duration-ms = 150
+
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
 # Possible values:
 # - Constant:     gaps.outer.top = 8

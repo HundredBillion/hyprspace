@@ -8,6 +8,12 @@ open class Window: TreeNode, Hashable {
     var isFullscreen: Bool = false
     /// Only makes sense for floating windows. Pinned windows are shown on all workspaces of their monitor
     var isPinned: Bool = false
+    /// The name of the special workspace this window is temporarily shown from. See ToggleSpecialWorkspaceCommand
+    var shownSpecialWorkspace: String? = nil
+    /// The rect of the floating window as of the last layout pass. Tiling windows use ``lastAppliedLayoutPhysicalRect``
+    var lastKnownFloatingRect: Rect? = nil
+    /// The first layout after the window was dragged or resized with the mouse must not be animated
+    var skipNextAnimation: Bool = false
     var noOuterGapsInFullscreen: Bool = false
     var layoutReason: LayoutReason = .standard
     var lifeStatus: WindowLifeStatus = .alive
@@ -50,10 +56,19 @@ open class Window: TreeNode, Hashable {
 
     var isHiddenInCorner: Bool { die("Not implemented") }
     @MainActor func nativeFocus() { die("Not implemented") }
+    /// Brings the window to the front without giving it the focus
+    @MainActor func raiseWithoutFocus() {}
+    @MainActor func forgetHiddenInCornerPosition() {}
     func getAxRect(_ cm: CancellationMode) async throws -> Rect? { die("Not implemented") }
     func getCenter(_ cm: CancellationMode) async throws -> CGPoint? { try await getAxRect(cm)?.center }
 
-    func setAxFrame(_ topLeft: CGPoint?, _ size: CGSize?) { die("Not implemented") }
+    @MainActor func setAxFrame(_ topLeft: CGPoint?, _ size: CGSize?) { die("Not implemented") }
+    /// Only the animation engine is supposed to call it. Everybody else must use ``setAxFrame``
+    /// - Parameter completion: called (on an arbitrary thread) once the app has processed the request
+    @MainActor func setAxFrameForAnimationStep(_ topLeft: CGPoint?, _ size: CGSize?, isIntermediate: Bool, completion: @escaping @Sendable () -> ()) {
+        setAxFrame(topLeft, size)
+        completion()
+    }
 }
 
 enum MacosWindowNativeState: Sendable {

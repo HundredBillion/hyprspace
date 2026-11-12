@@ -3,6 +3,12 @@ import Common
 import Network
 
 func startUnixSocketServer() {
+    let runtimeDir = getRuntimeDirPath(appId: hyprSpaceAppId)
+    switch checkRuntimeDir(runtimeDir, createIfMissing: true) {
+        case .ok: break
+        case .missing: die("Can't create the socket directory '\(runtimeDir)'")
+        case .unsafe(let msg): die("The socket directory is not safe to use: \(msg)")
+    }
     try? FileManager.default.removeItem(atPath: socketPath)
     let params = NWParameters.tcp
     params.requiredLocalEndpoint = .unix(path: socketPath)
@@ -14,13 +20,20 @@ func startUnixSocketServer() {
             await newConnection(connection)
         }
     }
+    listener.stateUpdateHandler = { state in
+        // Without the socket the CLI client can't reach the server. Don't keep running as if nothing has happened
+        if case .failed(let error) = state {
+            die("Can't listen on the socket '\(socketPath)': \(error)")
+        }
+    }
     listener.start(queue: .global())
 }
 
 func toggleReleaseServerIfDebug(_ state: EnableCmdArgs.State) async {
     if serverArgs.isReadOnly { return }
     if !isDebug { return }
-    let socketFile = "/tmp/\(stableHyprSpaceAppId)-\(unixUserName).sock"
+    if checkRuntimeDir(getRuntimeDirPath(appId: stableHyprSpaceAppId), createIfMissing: false) != .ok { return }
+    let socketFile = getSocketPath(appId: stableHyprSpaceAppId)
     let connection = NWConnection(to: NWEndpoint.unix(path: socketFile), using: .tcp)
     defer { connection.cancel() }
     if await connection.initConnection().error != nil { // Can't connect, HyprSpace.app is not running
