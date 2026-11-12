@@ -1,13 +1,11 @@
 == Resources
 
-*Project homepage:* https://github.com/OWNER/hyprspace +
+*Project homepage:* https://github.com/HundredBillion/hyprspace +
 *Guide:* docs/guide.adoc +
 
 == BUGS
 
-Bugs can be reported to https://github.com/OWNER/hyprspace/discussions/categories/potential-bugs
-
-Maintainers will move verified bugs to https://github.com/OWNER/hyprspace/issues
+Bugs can be reported to https://github.com/HundredBillion/hyprspace/issues
 
 == License
 

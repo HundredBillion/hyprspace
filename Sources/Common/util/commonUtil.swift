@@ -56,7 +56,7 @@ public func bugPrompt(_ __message: String = "", isDie: Bool = false, fileId: MyF
     let thread = Thread.current
     return """
         Please report to:
-            https://github.com/OWNER/hyprspace/discussions/categories/potential-bugs
+            https://github.com/HundredBillion/hyprspace/issues
             Please describe what you did to trigger this error
 
         Message: \(_message)
