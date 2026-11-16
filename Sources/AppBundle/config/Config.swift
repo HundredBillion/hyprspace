@@ -127,8 +127,8 @@ struct AnimationsConfig: Withable, Equatable {
     var durationMs: Int = 150
     /// New windows pop in: they grow to their size
     var windowOpen: Bool = true
-    /// Windows slide in and out when the workspace is switched
-    var workspaceSwitch: Bool = true
+    /// Windows slide in and out when the workspace is switched. Off by default: the workspace is switched instantly
+    var workspaceSwitch: Bool = false
 }
 
 struct RgbaColor: Equatable {

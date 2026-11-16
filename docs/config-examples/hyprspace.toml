@@ -35,7 +35,7 @@ border.rounding = 10
 animations.enabled = true
 animations.duration-ms = 150
 animations.window-open = true
-animations.workspace-switch = true
+animations.workspace-switch = false
 
 # Hyprland: bindm = SUPER, mouse:272, movewindow / bindm = SUPER, mouse:273, resizewindow
 # Hold alt and drag a window with the left mouse button to move it, with the right mouse button to resize it

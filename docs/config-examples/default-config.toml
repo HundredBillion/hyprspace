@@ -85,11 +85,12 @@ border.rounding = 10
 # Window animations. Windows glide to their new position when the layout changes
 # Set 'animations.enabled = false' if windows of some apps feel sluggish
 # 'window-open': new windows pop in (they grow to their size)
-# 'workspace-switch': windows slide in and out when the workspace is switched. Only played with a single monitor
+# 'workspace-switch': windows slide in and out when the workspace is switched. Only played with a single monitor.
+#                     It's off by default: the workspace is switched instantly
 animations.enabled = true
 animations.duration-ms = 150
 animations.window-open = true
-animations.workspace-switch = true
+animations.workspace-switch = false
 
 # Hold the modifier and drag anywhere on a window to move it (left mouse button) or to resize it (right mouse button)
 # The app under the cursor doesn't see those clicks

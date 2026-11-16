@@ -33,8 +33,9 @@ completions (`shell-completion/`).
   `layoutmsg swapwithmaster`, `layoutmsg focusmaster` and `layoutmsg mfact` work like in Hyprland.
 - **Window borders.** Every window has a border. Width, rounding, and the colors of the focused and of the other
   windows are configurable (`border.*`). Colors can be gradients: `'rgba(33ccffee) rgba(00ff99ee) 45deg'`.
-- **Window animations.** Windows glide to their new position when the layout changes, new windows pop in, and
-  windows slide in and out when the workspace is switched (`animations.*`).
+- **Window animations.** Windows glide to their new position when the layout changes and new windows pop in
+  (`animations.*`). The workspace is switched instantly by default; `animations.workspace-switch = true` makes the
+  windows slide in and out instead.
 - **Move and resize with the mouse.** `mouse-drag-modifier = 'alt'`: hold the modifier and drag anywhere on a window
   with the left mouse button to move it, with the right mouse button to resize it.
 - **Groups.** `togglegroup`, `changegroupactive`, `moveintogroup` and `moveoutofgroup` stack windows in one tile.

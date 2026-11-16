@@ -72,12 +72,13 @@ struct BorderAndAnimationsTest {
     }
 
     @Test func testOpenAndWorkspaceAnimations() {
-        let parsed = parseConfig("animations.window-open = false\nanimations.workspace-switch = false")
+        let parsed = parseConfig("animations.window-open = false\nanimations.workspace-switch = true")
         assertEquals(parsed.errors, [])
         assertEquals(parsed.config.animations.windowOpen, false)
-        assertEquals(parsed.config.animations.workspaceSwitch, false)
+        assertEquals(parsed.config.animations.workspaceSwitch, true)
         assertEquals(parseConfig("").config.animations.windowOpen, true)
-        assertEquals(parseConfig("").config.animations.workspaceSwitch, true)
+        // The workspace is switched instantly by default
+        assertEquals(parseConfig("").config.animations.workspaceSwitch, false)
 
         // The popin animation starts from a smaller rect with the same center
         let target = Rect(topLeftX: 100, topLeftY: 200, width: 1000, height: 500)
