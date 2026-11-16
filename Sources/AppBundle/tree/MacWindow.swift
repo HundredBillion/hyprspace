@@ -84,7 +84,7 @@ final class MacWindow: Window {
     // skipClosedWindowsCache is an optimization when it's definitely not necessary to cache closed window.
     //                        If you are unsure, it's better to pass `false`
     @MainActor
-    func garbageCollect(skipClosedWindowsCache: Bool) {
+    override func garbageCollect(skipClosedWindowsCache: Bool) {
         if MacWindow.allWindowsMap.removeValue(forKey: windowId) == nil {
             return
         }
@@ -135,7 +135,7 @@ final class MacWindow: Window {
 
     // todo it's part of the window layout and should be moved to layoutRecursive.swift
     @MainActor
-    func hideInCorner(_ corner: OptimalHideCorner) async throws {
+    override func hideInCorner(_ corner: OptimalHideCorner) async throws {
         guard let nodeMonitorInfo else { return }
         // Don't accidentally override prevUnhiddenEmulationPosition in case of subsequent `hideInCorner` calls
         if !isHiddenInCorner {
@@ -170,7 +170,7 @@ final class MacWindow: Window {
     }
 
     @MainActor
-    func unhideFromCorner() {
+    override func unhideFromCorner() {
         guard let prevUnhiddenProportionalPositionInsideWorkspaceRect else { return }
         guard let nodeWorkspace else { return } // hiding only makes sense for workspace windows
         guard let parent else { return }

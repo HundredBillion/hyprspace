@@ -1,7 +1,7 @@
 import Common
 import Foundation
 
-extension [AeroObj] {
+extension [HyprObj] {
     @MainActor
     func formatToJson(_ format: [InterToken<InterVar>], ignoreRightPaddingVar: Bool) -> Result<String, String> {
         var list: [[String: Primitive]] = []

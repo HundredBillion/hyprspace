@@ -59,6 +59,12 @@ open class Window: TreeNode, Hashable {
     /// Brings the window to the front without giving it the focus
     @MainActor func raiseWithoutFocus() {}
     @MainActor func forgetHiddenInCornerPosition() {}
+    /// Windows of invisible workspaces are hidden in a corner of the screen. Only real macOS windows need it
+    @MainActor func hideInCorner(_ corner: OptimalHideCorner) async throws {}
+    @MainActor func unhideFromCorner() {}
+    /// Forgets the window once it's gone from macOS
+    /// - Parameter skipClosedWindowsCache: see ``MacWindow.garbageCollect``
+    @MainActor func garbageCollect(skipClosedWindowsCache: Bool) { if isBound { unbindFromParent() } }
     func getAxRect(_ cm: CancellationMode) async throws -> Rect? { die("Not implemented") }
     func getCenter(_ cm: CancellationMode) async throws -> CGPoint? { try await getAxRect(cm)?.center }
 

@@ -27,7 +27,7 @@ public struct LayoutCmdArgs: CmdArgs {
         self.toggleBetween = .initialized(toggleBetween)
     }
 
-    public enum LayoutDescription: String, CaseIterable, Equatable, Sendable, AeroAny {
+    public enum LayoutDescription: String, CaseIterable, Equatable, Sendable, HyprAny {
         case accordion, tiles
         case horizontal, vertical
         case h_accordion, v_accordion, h_tiles, v_tiles

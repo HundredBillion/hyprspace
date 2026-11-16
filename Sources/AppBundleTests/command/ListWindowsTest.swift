@@ -36,7 +36,7 @@ struct ListWindowsTest {
     }
 
     @Test func testInterpolationVariablesConsistency() {
-        for kind in AeroObjKind.allCases {
+        for kind in HyprObjKind.allCases {
             switch kind {
                 case .window:
                     assertTrue(FormatVar.WindowFormatVar.allCases.allSatisfy { $0.rawValue.starts(with: "window-") })
@@ -53,24 +53,24 @@ struct ListWindowsTest {
     @Test func testFormat() {
         Workspace.get(byName: name).rootTilingContainer.apply {
             let windows = [
-                AeroObj.window(.forTest(window: TestWindow.new(id: 2, parent: $0), title: "non-empty")),
-                AeroObj.window(.forTest(window: TestWindow.new(id: 1, parent: $0), title: "")),
+                HyprObj.window(.forTest(window: TestWindow.new(id: 2, parent: $0), title: "non-empty")),
+                HyprObj.window(.forTest(window: TestWindow.new(id: 1, parent: $0), title: "")),
             ]
             assertSucc(windows.format([.interVar(.formatVar(.window(.windowTitle)))]), ["non-empty", ""])
         }
 
         Workspace.get(byName: name).rootTilingContainer.apply {
             let windows = [
-                AeroObj.window(.forTest(window: TestWindow.new(id: 2, parent: $0), title: "non-empty")),
-                AeroObj.window(.forTest(window: TestWindow.new(id: 10, parent: $0), title: "")),
+                HyprObj.window(.forTest(window: TestWindow.new(id: 2, parent: $0), title: "non-empty")),
+                HyprObj.window(.forTest(window: TestWindow.new(id: 10, parent: $0), title: "")),
             ]
             assertSucc(windows.format([.interVar(.formatVar(.window(.windowId))), .interVar(.plainInterVar(.rightPadding)), .interVar(.formatVar(.window(.windowTitle)))]), ["2 non-empty", "10"])
         }
 
         Workspace.get(byName: name).rootTilingContainer.apply {
             let windows = [
-                AeroObj.window(.forTest(window: TestWindow.new(id: 2, parent: $0), title: "title1")),
-                AeroObj.window(.forTest(window: TestWindow.new(id: 10, parent: $0), title: "title2")),
+                HyprObj.window(.forTest(window: TestWindow.new(id: 2, parent: $0), title: "title1")),
+                HyprObj.window(.forTest(window: TestWindow.new(id: 10, parent: $0), title: "title2")),
             ]
             assertSucc(windows.format([.interVar(.formatVar(.window(.windowId))), .interVar(.plainInterVar(.rightPadding)), .literal(" | "), .interVar(.formatVar(.window(.windowTitle)))]), ["2  | title1", "10 | title2"])
         }

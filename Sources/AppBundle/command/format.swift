@@ -29,13 +29,13 @@ struct WindowWithPrefetchedTitle {
     }
 }
 
-enum AeroObj {
+enum HyprObj {
     case window(WindowWithPrefetchedTitle)
     case workspace(Workspace)
     case app(any AbstractApp)
     case monitor(MonitorInfo)
 
-    var kind: AeroObjKind {
+    var kind: HyprObjKind {
         switch self {
             case .window: .window
             case .workspace: .workspace
@@ -45,7 +45,7 @@ enum AeroObj {
     }
 }
 
-extension [AeroObj] {
+extension [HyprObj] {
     /// The common output of the list-* commands
     /// - Parameter isDefaultFormat: the user didn't pass '--format'
     @MainActor
@@ -153,18 +153,18 @@ private struct Cell<T> {
 }
 
 extension FormatVar {
-    @MainActor func expandFormatVar(obj: AeroObj) -> Result<Primitive, InterVarExpansionError> {
+    @MainActor func expandFormatVar(obj: HyprObj) -> Result<Primitive, InterVarExpansionError> {
         switch (obj, self) {
             case (.window(let w), .workspace):
-                return w.window.nodeWorkspace.flatMap(AeroObj.workspace).map(expandFormatVar) ?? .success(.string("NULL-WORKSPACE"))
+                return w.window.nodeWorkspace.flatMap(HyprObj.workspace).map(expandFormatVar) ?? .success(.string("NULL-WORKSPACE"))
             case (.window(let w), .monitor):
-                return w.window.nodeMonitorInfo.flatMap(AeroObj.monitor).map(expandFormatVar) ?? .success(.string("NULL-MONITOR"))
+                return w.window.nodeMonitorInfo.flatMap(HyprObj.monitor).map(expandFormatVar) ?? .success(.string("NULL-MONITOR"))
             case (.window(let w), .app):
                 return expandFormatVar(obj: .app(w.window.app))
             case (.window(_), .window): break
 
             case (.workspace(let ws), .monitor):
-                return expandFormatVar(obj: AeroObj.monitor(ws.workspaceMonitorInfo))
+                return expandFormatVar(obj: HyprObj.monitor(ws.workspaceMonitorInfo))
             case (.workspace, _): break
 
             case (.app(_), _): break
@@ -240,7 +240,7 @@ extension PlainInterVar {
 }
 
 extension InterVar {
-    @MainActor func expandFormatVar(obj: AeroObj) -> Result<Primitive, InterVarExpansionError> {
+    @MainActor func expandFormatVar(obj: HyprObj) -> Result<Primitive, InterVarExpansionError> {
         switch self {
             case .formatVar(let it): it.expandFormatVar(obj: obj)
             case .plainInterVar(let it): it.expandFormatVar()
@@ -248,7 +248,7 @@ extension InterVar {
     }
 }
 
-func unknownInterpolationVariable(variable: String, _ obj: AeroObj) -> String {
+func unknownInterpolationVariable(variable: String, _ obj: HyprObj) -> String {
     "Unknown interpolation variable '\(variable)'. " +
         "Possible values:\n\(getAvailableInterVars(for: obj.kind).joined(separator: "\n").prependLines("  "))"
 }

@@ -12,6 +12,6 @@ struct ListAppsCommand: Command {
         }
 
         if args.outputOnlyCount { return .succ(io.out("\(result.count)")) }
-        return result.map(AeroObj.app).printFormatted(io, args.format, json: args.json, isDefaultFormat: args._format.isEmpty)
+        return result.map(HyprObj.app).printFormatted(io, args.format, json: args.json, isDefaultFormat: args._format.isEmpty)
     }
 }

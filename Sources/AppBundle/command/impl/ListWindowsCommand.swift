@@ -51,7 +51,7 @@ struct ListWindowsCommand: Command {
             _list = _list.filter { $0.window.isBound }
             _list = _list.sortedBy([{ $0.window.app.name ?? "" }, { $0.title ?? "" }])
 
-            return _list.map { AeroObj.window($0) }
+            return _list.map { HyprObj.window($0) }
                 .printFormatted(io, args.format, json: args.json, isDefaultFormat: args._format.isEmpty)
         }
     }

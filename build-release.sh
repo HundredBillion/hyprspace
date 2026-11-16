@@ -30,7 +30,7 @@ swift_build_cli=(build -c release --arch arm64 --arch x86_64 --product hyprspace
 swift "${swift_build_cli[@]}" -Xswiftc -warnings-as-errors \
     -Xlinker -sectcreate \
     -Xlinker __TEXT \
-    -Xlinker __aero_build \
+    -Xlinker __hypr_build \
     -Xlinker "$build_info_file"
 cli_bin_path="$(swift "${swift_build_cli[@]}" --show-bin-path)"
 
@@ -51,7 +51,7 @@ cd ./xcode
         STRIP_INSTALLED_PRODUCT=YES \
         STRIP_STYLE=non-global \
         STRIP_SWIFT_SYMBOLS=YES \
-        HYPRSPACE_BUILD_INFO_LDFLAGS="-sectcreate __TEXT __aero_build $build_info_file"
+        HYPRSPACE_BUILD_INFO_LDFLAGS="-sectcreate __TEXT __hypr_build $build_info_file"
 cd -
 
 cp -r "xcode/.xcode-build/Build/Products/$xcode_configuration/HyprSpace.app" .release

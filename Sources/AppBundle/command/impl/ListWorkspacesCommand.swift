@@ -20,7 +20,7 @@ struct ListWorkspacesCommand: Command {
         }
 
         if args.outputOnlyCount { return .succ(io.out("\(result.count)")) }
-        return result.map(AeroObj.workspace).printFormatted(io, args.format, json: args.json, isDefaultFormat: args._format.isEmpty)
+        return result.map(HyprObj.workspace).printFormatted(io, args.format, json: args.json, isDefaultFormat: args._format.isEmpty)
     }
 }
 
