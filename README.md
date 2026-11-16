@@ -7,7 +7,23 @@ foundation (the tree model, workspace emulation, CLI, config parsing). See [LICE
 
 ## Status
 
-Early work in progress. Not released, not notarized, debug builds only.
+Early work in progress. Releases are self-signed and not notarized.
+
+## Install
+
+Download `HyprSpace-v<version>.zip` from the [releases page](https://github.com/HundredBillion/hyprspace/releases) and run:
+
+```
+unzip HyprSpace-v*.zip && cd HyprSpace-v*/
+xattr -dr com.apple.quarantine .          # The build is not notarized. macOS refuses to open it otherwise
+cp -R HyprSpace.app /Applications/
+cp bin/hyprspace /usr/local/bin/           # or any other directory in your PATH
+cp ../docs/config-examples/hyprspace.toml ~/.hyprspace.toml   # optional: the ready-to-use config from this repo
+open -a HyprSpace
+```
+
+Grant the Accessibility permission when macOS asks for it. The zip also contains man pages (`manpage/`) and shell
+completions (`shell-completion/`).
 
 ## Hyprland-style features
 
