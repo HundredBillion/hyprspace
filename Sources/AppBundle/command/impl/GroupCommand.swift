@@ -25,11 +25,20 @@ struct GroupCommand: Command {
                 return .from(bool: windowToFocus.focusWindow())
             case .moveOut:
                 guard parent.layout == .accordion else { return .fail(io.err(notInGroup)) }
-                guard let grandParent = parent.parent as? TilingContainer, let groupIndex = parent.ownIndex(in: .all) else {
-                    return .fail(io.err("The group takes the whole workspace. Tip: use 'group toggle' to dissolve it"))
+                if let grandParent = parent.parent as? TilingContainer, let groupIndex = parent.ownIndex(in: .all) {
+                    window.unbindFromParent()
+                    window.bind(to: grandParent, adaptiveWeight: WEIGHT_AUTO, index: groupIndex + 1)
+                } else {
+                    // The group is the root container, and there is no container to move the window out to.
+                    // The rest of the windows stay grouped in a nested container, and the root becomes tiles
+                    let rest = parent.children.filter { $0 != window }
+                    let group = TilingContainer(parent: parent, adaptiveWeight: WEIGHT_AUTO, parent.orientation.opposite, .accordion, index: 0)
+                    for node in rest {
+                        node.unbindFromParent()
+                        node.bind(to: group, adaptiveWeight: WEIGHT_AUTO, index: INDEX_BIND_LAST)
+                    }
+                    parent.layout = .tiles
                 }
-                window.unbindFromParent()
-                window.bind(to: grandParent, adaptiveWeight: WEIGHT_AUTO, index: groupIndex + 1)
                 return .from(bool: window.focusWindow())
             case .moveIn(let direction):
                 guard let (neighborParent, _, neighborIndex) = window.closestParent(hasInhabitedChildrenInDirection: direction, withLayout: nil),

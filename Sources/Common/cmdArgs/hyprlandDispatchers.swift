@@ -115,7 +115,9 @@ private func hyprlandRelativeWorkspace(_ raw: String) -> ResOrStr<[String]>? {
     guard let sign = rest.first, sign == "+" || sign == "-", let offset = Int(rest.dropFirst()), rest.count >= 2 else { return nil }
     if offset != 1 { return .failure("workspace '\(raw)': only the offsets +1 and -1 are supported") }
     let wrapAround = selector == "e" || selector == "m"
-    return .success((wrapAround ? ["--wrap-around"] : []) + [sign == "+" ? "next" : "prev"])
+    // Hyprland dispatchers never read the list of workspaces from stdin. Without the flag, the CLI refuses to run
+    // 'workspace next' when its stdin is not a TTY (scripts, launchers)
+    return .success(["--no-stdin"] + (wrapAround ? ["--wrap-around"] : []) + [sign == "+" ? "next" : "prev"])
 }
 
 public let specialWorkspaceName = "special"

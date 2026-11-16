@@ -11,10 +11,10 @@ struct HyprlandFeaturesTest {
     // MARK: Dispatchers
 
     @Test func testParseDispatchers() {
-        testParseSingleCommandSucc("workspace e+1", WorkspaceCmdArgs(target: .relative(.next)).with(\._wrapAround, true))
-        testParseSingleCommandSucc("workspace m-1", WorkspaceCmdArgs(target: .relative(.prev)).with(\._wrapAround, true))
-        testParseSingleCommandSucc("workspace +1", WorkspaceCmdArgs(target: .relative(.next)))
-        testParseSingleCommandSucc("workspace r-1", WorkspaceCmdArgs(target: .relative(.prev)))
+        testParseSingleCommandSucc("workspace e+1", WorkspaceCmdArgs(target: .relative(.next)).with(\._wrapAround, true).with(\.commonState.explicitStdinFlag, false))
+        testParseSingleCommandSucc("workspace m-1", WorkspaceCmdArgs(target: .relative(.prev)).with(\._wrapAround, true).with(\.commonState.explicitStdinFlag, false))
+        testParseSingleCommandSucc("workspace +1", WorkspaceCmdArgs(target: .relative(.next)).with(\.commonState.explicitStdinFlag, false))
+        testParseSingleCommandSucc("workspace r-1", WorkspaceCmdArgs(target: .relative(.prev)).with(\.commonState.explicitStdinFlag, false))
         // Not a Hyprland form. It's a plain workspace name
         testParseSingleCommandSucc("workspace e1", WorkspaceCmdArgs(target: .direct(.parse("e1").getOrDie())))
         assertEquals(parseCommand("workspace +2").errorOrNil, "workspace '+2': only the offsets +1 and -1 are supported")
@@ -176,6 +176,21 @@ struct HyprlandFeaturesTest {
         assertEquals(root.layoutDescription, .h_accordion([.v_accordion([.window(2), .window(1)]), .window(3)]))
         await parseCommand("togglegroup").cmdOrDie.run(.defaultEnv, .emptyStdin)
         assertEquals(root.layoutDescription, .h_tiles([.v_accordion([.window(2), .window(1)]), .window(3)]))
+    }
+
+    @Test func testMoveOutOfTheRootGroup() async {
+        let root = Workspace.get(byName: name).rootTilingContainer
+        TestWindow.new(id: 1, parent: root)
+        TestWindow.new(id: 2, parent: root)
+        let window3 = TestWindow.new(id: 3, parent: root)
+        assertEquals(window3.focusWindow(), true)
+        await parseCommand("togglegroup").cmdOrDie.run(.defaultEnv, .emptyStdin)
+        assertEquals(root.layoutDescription, .h_accordion([.window(1), .window(2), .window(3)]))
+
+        // The group is the root container. The rest of the windows stay grouped
+        await parseCommand("moveoutofgroup").cmdOrDie.run(.defaultEnv, .emptyStdin)
+        assertEquals(root.layoutDescription, .h_tiles([.v_accordion([.window(1), .window(2)]), .window(3)]))
+        assertEquals(globalFocus.windowOrNil?.windowId, 3)
     }
 
     // MARK: Mouse
