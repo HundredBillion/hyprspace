@@ -46,6 +46,23 @@ enum AeroObj {
 }
 
 extension [AeroObj] {
+    /// The common output of the list-* commands
+    /// - Parameter isDefaultFormat: the user didn't pass '--format'
+    @MainActor
+    func printFormatted(_ io: CmdIo, _ format: [InterToken<InterVar>], json: Bool, isDefaultFormat: Bool) -> BinaryExitCode {
+        if json {
+            switch formatToJson(format, ignoreRightPaddingVar: isDefaultFormat) {
+                case .success(let json): .succ(io.out(json))
+                case .failure(let msg): .fail(io.err(msg))
+            }
+        } else {
+            switch self.format(format) {
+                case .success(let lines): .succ(io.out(lines))
+                case .failure(let msg): .fail(io.err(msg.map(\.description).joinErrors()))
+            }
+        }
+    }
+
     @MainActor
     func format(_ format: [InterToken<InterVar>]) -> Result<[String], [InterVarExpansionError]> {
         var cellTable: [[Cell<String>]] = []

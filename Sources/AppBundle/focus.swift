@@ -26,6 +26,22 @@ struct LiveFocus: AeroAny, Equatable {
     }
 }
 
+extension LiveFocus {
+    /// The window that goes next to (or before) the focused window in the depth-first order of the workspace.
+    /// The search wraps around at the boundaries of the workspace: `isWrappedAround` tells if it has happened.
+    /// - Returns: nil if the focused window isn't a tiling window of the workspace
+    @MainActor func dfsNeighbor(_ nextPrev: DfsNextPrev) -> (window: Window, isWrappedAround: Bool)? {
+        let windows = workspace.rootTilingContainer.allInhabitedLeafWindowsRecursive
+        guard let currentIndex = windows.firstIndex(where: { $0 == windowOrNil }) else { return nil }
+        let targetIndex = switch nextPrev {
+            case .dfsNext: currentIndex + 1
+            case .dfsPrev: currentIndex - 1
+        }
+        let isWrappedAround = !windows.indices.contains(targetIndex)
+        return (windows[(targetIndex + windows.count) % windows.count], isWrappedAround)
+    }
+}
+
 /// "old", "captured", "frozen in time" Focus
 /// It's safe to keep a hard reference to this object.
 /// Unlike in LiveFocus, information inside FrozenFocus isn't guaranteed to be self-consistent.

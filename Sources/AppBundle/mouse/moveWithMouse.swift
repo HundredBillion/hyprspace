@@ -1,38 +1,8 @@
 import AppKit
 import Common
 
-@MainActor
-private var moveWithMouseTask: Task<(), any Error>? = nil
-
 func movedObs(_: AXObserver, ax: AXUIElement, notif: CFString, _: UnsafeMutableRawPointer?) {
-    let nativeWindowId = ax.containingNativeWindowId()
-    let notif = notif as String
-    let pid = ax.pid
-    Task.startUnstructured { @MainActor in
-        guard let token: RunSessionGuard = .isServerEnabled else { return }
-        // The window animation moves and resizes windows many times in a row. Those notifications are our own echo.
-        // The notification that follows the last animation step still triggers the refresh
-        if let nativeWindowId, let pid, let window = Window.get(byNativeId: nativeWindowId, pid: pid),
-           animatedRect(of: window.windowId) != nil
-        {
-            return
-        }
-        guard let nativeWindowId,
-              let pid,
-              let window = Window.get(byNativeId: nativeWindowId, pid: pid),
-              try await isManipulatedWithMouse(window)
-        else {
-            scheduleCancellableCompleteRefreshSession(.ax(notif))
-            return
-        }
-        moveWithMouseTask?.cancel()
-        moveWithMouseTask = Task.startUnstructured {
-            try checkCancellation()
-            try await runLightSession(.ax(notif), token) {
-                try await moveWithMouse(window)
-            }
-        }
-    }
+    manipulatedWithMouseObs(.move, ax: ax, notif: notif) { try await moveWithMouse($0) }
 }
 
 @MainActor

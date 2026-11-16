@@ -51,18 +51,8 @@ struct ListWindowsCommand: Command {
             _list = _list.filter { $0.window.isBound }
             _list = _list.sortedBy([{ $0.window.app.name ?? "" }, { $0.title ?? "" }])
 
-            let list = _list.map { AeroObj.window($0) }
-            if args.json {
-                return switch list.formatToJson(args.format, ignoreRightPaddingVar: args._format.isEmpty) {
-                    case .success(let json): .succ(io.out(json))
-                    case .failure(let msg): .fail(io.err(msg))
-                }
-            } else {
-                return switch list.format(args.format) {
-                    case .success(let lines): .succ(io.out(lines))
-                    case .failure(let msg): .fail(io.err(msg.map(\.description).joinErrors()))
-                }
-            }
+            return _list.map { AeroObj.window($0) }
+                .printFormatted(io, args.format, json: args.json, isDefaultFormat: args._format.isEmpty)
         }
     }
 }

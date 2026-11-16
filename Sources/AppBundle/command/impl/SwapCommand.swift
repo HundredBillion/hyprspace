@@ -26,21 +26,10 @@ struct SwapCommand: Command {
                         return .fail
                 }
             case .dfsNextPrev(let nextPrev):
-                let windows = target.workspace.rootTilingContainer.allInhabitedLeafWindowsRecursive
-                guard let currentIndex = windows.firstIndex(where: { $0 == target.windowOrNil }) else {
+                guard let neighbor = target.dfsNeighbor(nextPrev), !neighbor.isWrappedAround || args.wrapAround else {
                     return .fail
                 }
-                var targetIndex = switch nextPrev {
-                    case .dfsNext: currentIndex + 1
-                    case .dfsPrev: currentIndex - 1
-                }
-                if !(0 ..< windows.count).contains(targetIndex) {
-                    if !args.wrapAround {
-                        return .fail
-                    }
-                    targetIndex = (targetIndex + windows.count) % windows.count
-                }
-                targetWindow = windows[targetIndex]
+                targetWindow = neighbor.window
         }
 
         guard let targetWindow else {
