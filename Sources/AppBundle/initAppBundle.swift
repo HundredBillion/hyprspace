@@ -51,14 +51,11 @@ import Foundation
     check(result.isOk, msg)
 }
 
+/// The windows that are already opened on startup are laid out the way the config asks for.
+/// Upstream stacks them into an accordion when there are more than 3 windows. Hyprland never does that
 @MainActor
 private func smartLayoutAtStartup() {
-    let workspace = globalFocus.workspace
-    let root = workspace.rootTilingContainer
-    switch root.children.count <= 3 {
-        case true: root.layout = .tiles
-        case false: root.layout = .accordion
-    }
+    globalFocus.workspace.rootTilingContainer.layout = config.defaultRootContainerLayout
 }
 
 var isStartup: Bool { refreshSessionEvent?.isStartup == true }

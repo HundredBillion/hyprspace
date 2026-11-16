@@ -9,8 +9,23 @@ private struct WindowAnimation {
     let id: Int
     let target: Rect
     var current: Rect
+    /// Not nil if the window slides out of the monitor: the window is put there once the animation is over
+    let finalPosition: CGPoint?
     let task: Task<(), Never>
 }
+
+enum SlideSide {
+    case left, right
+
+    var opposite: SlideSide { self == .left ? .right : .left }
+}
+
+/// The side of the monitor the windows of the workspace that has just become visible slide in from.
+/// The windows of the workspace that has just become invisible slide out to the opposite side
+@MainActor var incomingWorkspaceSlideSide: SlideSide = .right
+
+/// Hyprland's default 'popin 87%'
+private let popinScale: CGFloat = 0.87
 
 @MainActor private var windowAnimations: [OpaqueWindowId: WindowAnimation] = [:]
 @MainActor private var lastAnimationId = 0
@@ -40,14 +55,39 @@ func cancelWindowAnimation(_ windowId: OpaqueWindowId) {
     windowAnimations.removeValue(forKey: windowId)?.task.cancel()
 }
 
+/// The window is on its way out of the monitor. Nobody else is supposed to move it in the meantime
+@MainActor
+func isSlidingOut(_ windowId: OpaqueWindowId) -> Bool { windowAnimations[windowId]?.finalPosition != nil }
+
+/// Workspaces are emulated by hiding windows in the corner of the monitor. Sliding windows out of one monitor
+/// would drag them across the neighboring monitor, that's why the animation is only played with a single monitor
+@MainActor
+var isWorkspaceSwitchAnimated: Bool {
+    !isUnitTest && config.animations.enabled && config.animations.workspaceSwitch && globalUnsortedMonitorInfos.count == 1
+}
+
+/// The rect where the 'popin' animation of a new window starts
+func popinStartRect(_ target: Rect) -> Rect {
+    centeredRect(of: CGSize(width: (target.width * popinScale).rounded(), height: (target.height * popinScale).rounded()), in: target)
+}
+
+/// The rect of the window when it is slid out of the monitor to the given side.
+/// One pixel of the window stays on the monitor: macOS moves windows that are completely off screen back
+func slidOutRect(_ rect: Rect, to side: SlideSide, monitor: Rect) -> Rect {
+    Rect(
+        topLeftX: side == .left ? monitor.minX - rect.width + 1 : monitor.maxX - 1,
+        topLeftY: rect.topLeftY,
+        width: rect.width,
+        height: rect.height,
+    )
+}
+
 extension Window {
     /// - Parameter old: the previous rect of the window as known by the layout engine. nil if the window is new
     @MainActor
     func setAxFrameAnimated(from old: Rect?, to target: Rect) {
         let animations = config.animations
-        // Windows must follow the cursor without a delay while the user drags or resizes a window with the mouse
-        let isAnimationAllowed = animations.enabled && !isUnitTest && currentlyManipulatedWithMouseWindowId == nil &&
-            slowAnimationStrikes[app.pid, default: 0] < maxSlowAnimationStrikes
+        let isAnimationAllowed = isAnimationAllowed
         if let running = windowAnimations[windowId] {
             if running.target.isAlmostEqual(to: target) { return } // The window is already on its way
             cancelWindowAnimation(windowId)
@@ -65,7 +105,27 @@ extension Window {
     }
 
     @MainActor
-    private func startAnimation(from: Rect, to target: Rect, steps: Int) {
+    private var isAnimationAllowed: Bool {
+        // Windows must follow the cursor without a delay while the user drags or resizes a window with the mouse
+        config.animations.enabled && !isUnitTest && currentlyManipulatedWithMouseWindowId == nil &&
+            slowAnimationStrikes[app.pid, default: 0] < maxSlowAnimationStrikes
+    }
+
+    /// Slides the window out of the monitor and puts it at `finalPosition` afterwards
+    /// - Returns: false if the window can't be animated. The caller is supposed to move the window itself then
+    @MainActor
+    func slideOut(from rect: Rect, to side: SlideSide, monitor: Rect, finalPosition: CGPoint) -> Bool {
+        let steps = animationSteps(config.animations)
+        let target = slidOutRect(rect, to: side, monitor: monitor)
+        guard isAnimationAllowed, steps >= 2, !rect.isAlmostEqual(to: target) else { return false }
+        let from = windowAnimations[windowId]?.current ?? rect
+        cancelWindowAnimation(windowId)
+        startAnimation(from: from, to: target, steps: steps, finalPosition: finalPosition)
+        return true
+    }
+
+    @MainActor
+    private func startAnimation(from: Rect, to target: Rect, steps: Int, finalPosition: CGPoint? = nil) {
         let steps = max(1, steps)
         lastAnimationId += 1
         let id = lastAnimationId
@@ -88,6 +148,9 @@ extension Window {
                 if isLast {
                     // The last step always sets the full frame to make sure that the window ends up exactly at the target
                     self.setAxFrameForAnimationStep(rect.topLeftCorner, rect.size, isIntermediate: false) {}
+                    if let finalPosition {
+                        self.setAxFrameForAnimationStep(finalPosition, nil, isIntermediate: false) {}
+                    }
                     if isAnimationTooSlow(sentFrames: sentFrames, droppedFrames: droppedFrames) {
                         slowAnimationStrikes[pid, default: 0] += 1
                     }
@@ -106,13 +169,13 @@ extension Window {
                     lastSent = rect
                 }
                 windowAnimations[windowId]?.current = lastSent
-                FocusBorder.shared.windowDidAnimate(windowId, rect)
+                WindowBorders.shared.windowDidAnimate(windowId, rect)
                 if !isLast {
                     do { try await Task.sleep(for: .milliseconds(1000 / animationFps)) } catch { return }
                 }
             }
         }
-        windowAnimations[windowId] = WindowAnimation(id: id, target: target, current: from, task: task)
+        windowAnimations[windowId] = WindowAnimation(id: id, target: target, current: from, finalPosition: finalPosition, task: task)
     }
 }
 

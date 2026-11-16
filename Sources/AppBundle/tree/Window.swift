@@ -12,6 +12,12 @@ open class Window: TreeNode, Hashable {
     var shownSpecialWorkspace: String? = nil
     /// The rect of the floating window as of the last layout pass. Tiling windows use ``lastAppliedLayoutPhysicalRect``
     var lastKnownFloatingRect: Rect? = nil
+    /// Not nil if the window is pseudotiled: it keeps this size inside of its tile. See PseudoCommand
+    var pseudotiledSize: CGSize? = nil
+    /// The first layout of a new window plays the 'popin' animation
+    var playOpenAnimation: Bool = false
+    /// Not nil if the next layout slides the window in from the given side of the monitor (workspace switch)
+    var slideInFrom: SlideSide? = nil
     /// The first layout after the window was dragged or resized with the mouse must not be animated
     var skipNextAnimation: Bool = false
     var noOuterGapsInFullscreen: Bool = false

@@ -4,6 +4,9 @@
 let balance_sizes_help_generated = """
     USAGE: balance-sizes [-h|--help] [--workspace <workspace>]
     """
+let centerwindow_help_generated = """
+    USAGE: centerwindow [-h|--help] [--window-id <window-id>]
+    """
 let close_all_windows_but_current_help_generated = """
     USAGE: close-all-windows-but-current [-h|--help] [--quit-if-last-window]
     """
@@ -62,6 +65,9 @@ let fullscreen_help_generated = """
     USAGE: fullscreen [-h|--help]     [--window-id <window-id>] [--no-outer-gaps]
        OR: fullscreen [-h|--help] on  [--window-id <window-id>] [--no-outer-gaps] [--fail-if-noop]
        OR: fullscreen [-h|--help] off [--window-id <window-id>] [--fail-if-noop]
+    """
+let group_help_generated = """
+    USAGE: group [-h|--help] [--window-id <window-id>] (toggle|next|prev|move-in <direction>|move-out)
     """
 let join_with_help_generated = """
     USAGE: join-with [-h|--help] [--window-id <window-id>] (left|down|up|right)
@@ -138,8 +144,14 @@ let move_help_generated = """
                 [--boundaries-action <boundary-action>] [--fail-if-fullscreen]
                 [--fail-if-macos-native-fullscreen] (left|down|up|right)
     """
+let moveactive_help_generated = """
+    USAGE: moveactive [-h|--help] [--window-id <window-id>] [exact] <x> <y>
+    """
 let pin_help_generated = """
     USAGE: pin [-h|--help] [--window-id <window-id>] [on|off]
+    """
+let pseudo_help_generated = """
+    USAGE: pseudo [-h|--help] [--window-id <window-id>] [on|off]
     """
 let reload_config_help_generated = """
     USAGE: reload-config [-h|--help] [--no-gui] [--dry-run] [--warnings-as-errors]
@@ -148,7 +160,7 @@ let resize_help_generated = """
     USAGE: resize [-h|--help] [--window-id <window-id>] (smart|smart-opposite|width|height) [+|-]<number>
     """
 let resizeactive_help_generated = """
-    USAGE: resizeactive [-h|--help] [exact] <x> <y>
+    USAGE: resizeactive [-h|--help] [--window-id <window-id>] [exact] <x> <y>
     """
 let run_callback_help_generated = """
     USAGE: run-callback [-h|--help] [--for-every-window|--window-id <window-id>] on-window-detected

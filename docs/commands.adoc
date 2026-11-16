@@ -12,6 +12,13 @@ include::hyprspace-balance-sizes.adoc[tags=synopsis]
 include::hyprspace-balance-sizes.adoc[tags=purpose]
 include::hyprspace-balance-sizes.adoc[tags=body]
 
+== centerwindow
+----
+include::hyprspace-centerwindow.adoc[tags=synopsis]
+----
+include::hyprspace-centerwindow.adoc[tags=purpose]
+include::hyprspace-centerwindow.adoc[tags=body]
+
 == close
 ----
 include::hyprspace-close.adoc[tags=synopsis]
@@ -111,6 +118,13 @@ include::hyprspace-fullscreen.adoc[tags=synopsis]
 include::hyprspace-fullscreen.adoc[tags=purpose]
 include::hyprspace-fullscreen.adoc[tags=body]
 
+== group
+----
+include::hyprspace-group.adoc[tags=synopsis]
+----
+include::hyprspace-group.adoc[tags=purpose]
+include::hyprspace-group.adoc[tags=body]
+
 == join-with
 ----
 include::hyprspace-join-with.adoc[tags=synopsis]
@@ -203,6 +217,13 @@ include::hyprspace-move.adoc[tags=synopsis]
 include::hyprspace-move.adoc[tags=purpose]
 include::hyprspace-move.adoc[tags=body]
 
+== moveactive
+----
+include::hyprspace-moveactive.adoc[tags=synopsis]
+----
+include::hyprspace-moveactive.adoc[tags=purpose]
+include::hyprspace-moveactive.adoc[tags=body]
+
 == move-mouse
 ----
 include::./hyprspace-move-mouse.adoc[tags=synopsis]
@@ -237,6 +258,13 @@ include::hyprspace-pin.adoc[tags=synopsis]
 ----
 include::hyprspace-pin.adoc[tags=purpose]
 include::hyprspace-pin.adoc[tags=body]
+
+== pseudo
+----
+include::hyprspace-pseudo.adoc[tags=synopsis]
+----
+include::hyprspace-pseudo.adoc[tags=purpose]
+include::hyprspace-pseudo.adoc[tags=body]
 
 == reload-config
 ----

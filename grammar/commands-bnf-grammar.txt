@@ -76,8 +76,18 @@ hyprspace -h;
     | layoutmsg mfact <number>
     | layoutmsg mfact exact <number>
 
-    | resizeactive <number> <number>
-    | resizeactive exact <number> <number>
+    | resizeactive [--window-id <window_id>] <number> <number>
+    | resizeactive [--window-id <window_id>] exact <number> <number>
+
+    | moveactive [--window-id <window_id>] <number> <number>
+    | moveactive [--window-id <window_id>] exact <number> <number>
+
+    | centerwindow [--window-id <window_id>]
+
+    | pseudo [--window-id <window_id>] [on|off]
+
+    | group [--window-id <window_id>] (toggle|next|prev|move-out)
+    | group [--window-id <window_id>] move-in (left|down|up|right)
 
     | togglespecialworkspace [<workspace>]
 

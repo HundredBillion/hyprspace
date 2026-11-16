@@ -79,7 +79,7 @@ func runLightSession<T>(
 
         updateTrayText()
         SecureInputPanel.shared.refresh()
-        if event.isFocusFollowsMouse { refreshFocusBorder() } else { try await layoutWorkspaces() }
+        if event.isFocusFollowsMouse { refreshWindowBorders() } else { try await layoutWorkspaces() }
         if focusBefore != focusAfter {
             focusAfter?.nativeFocus() // syncFocusToMacOs
         }
@@ -153,7 +153,7 @@ enum OptimalHideCorner {
 @MainActor
 private func layoutWorkspaces() async throws {
     try await layoutWorkspacesWithoutBorder()
-    refreshFocusBorder()
+    refreshWindowBorders()
 }
 
 @MainActor
@@ -192,9 +192,13 @@ private func layoutWorkspacesWithoutBorder() async throws {
     }
 
     // to reduce flicker, first unhide visible workspaces, then hide invisible ones
+    let isWorkspaceSwitchAnimated = isWorkspaceSwitchAnimated
     for monitor in monitors {
         let workspace = monitor.visibleWorkspace
-        workspace.allLeafWindowsRecursive.forEach { $0.unhideFromCorner() }
+        for window in workspace.allLeafWindowsRecursive {
+            if isWorkspaceSwitchAnimated && window.isHiddenInCorner { window.slideInFrom = incomingWorkspaceSlideSide }
+            window.unhideFromCorner()
+        }
         try await workspace.layoutWorkspace()
     }
     for workspace in Workspace.all where !workspace.isVisible {

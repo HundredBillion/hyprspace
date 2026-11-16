@@ -1,0 +1,37 @@
+= hyprspace-moveactive(1)
+include::util/man-attributes.adoc[]
+// tag::purpose[]
+:manpurpose: Move the focused floating window by the given amount of pixels
+// end::purpose[]
+:manname: hyprspace-moveactive
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace moveactive [-h|--help] [--window-id <window-id>] [exact] <x> <y>
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}.
+
+`<x>` moves the window to the right, `<y>` moves the window down. Negative numbers move it left and up.
+
+With `exact`, `<x>` and `<y>` are the new position of the top left corner of the window relative to its monitor.
+The position can also be a percentage of the monitor: `moveactive exact 10% 10%`.
+
+Only floating windows can be moved. The command fails for tiling windows.
+// end::body[]
+
+// =========================================================== Options
+include::util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+--window-id <window-id>:: Act on the specified window instead of the focused window
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]

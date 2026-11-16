@@ -18,19 +18,27 @@ gaps.outer.bottom =     20
 gaps.outer.top =        20
 gaps.outer.right =      20
 
-# Hyprland: general:border_size, general:col.active_border, decoration:rounding
+# Hyprland: general:border_size, general:col.active_border, general:col.inactive_border, decoration:rounding
 border.enabled = true
 border.width = 2
-border.active-color = 'rgba(33ccffee)'
+border.active-color = 'rgba(33ccffee) rgba(00ff99ee) 45deg'
+border.inactive-color = 'rgba(595959aa)'
 border.rounding = 10
 
 # Hyprland: animations:enabled
 animations.enabled = true
 animations.duration-ms = 150
+animations.window-open = true
+animations.workspace-switch = true
+
+# Hyprland: bindm = SUPER, mouse:272, movewindow / bindm = SUPER, mouse:273, resizewindow
+# Hold alt and drag a window with the left mouse button to move it, with the right mouse button to resize it
+mouse-drag-modifier = 'alt'
 
 # Hyprland-like window rules: 'RULE, MATCHER[, MATCHER]...'
-# Rules: float, tile, pin, fullscreen, workspace <name> [silent]
-# Matchers: class:<regex> (app name or app bundle ID), title:<regex>. The regex must match the full string
+# Rules: float, tile, pin, fullscreen, maximize, pseudo, center, size <w> <h>, move <x> <y>, workspace <name> [silent]
+# 'size' and 'move' accept pixels and percentages of the monitor. Put the 'float' rule first
+# Matchers: class:<regex> (app name or app bundle ID), title:<regex>, workspace:<name>. The regex must match the full string
 windowrule = [
     'float, class:^(Calculator)$',
     'float, class:^(System Settings)$',
@@ -83,6 +91,10 @@ windowrule = [
     # Special workspace (scratchpad)
     alt-s =       'togglespecialworkspace magic'
     alt-shift-s = 'movetoworkspacesilent special:magic'
+
+    # Groups: windows that share one tile
+    alt-g =       'togglegroup'
+    alt-shift-g = 'changegroupactive'
 
     alt-tab =       'cyclenext'
     alt-shift-tab = 'cyclenext prev'

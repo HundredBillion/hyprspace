@@ -3,6 +3,12 @@ public func parseCmdArgs(_ args: StrArrSlice) -> ParsedCmd<any CmdArgs> {
     if subcommand.isEmpty {
         return .failure("Can't parse empty string command", EXIT_CODE_TWO)
     }
+    if let translated = translateHyprlandFormOfNativeCommand(args.toArray()) {
+        return switch translated {
+            case .success(let native): parseCmdArgs(native.slice)
+            case .failure(let msg): .failure(msg, EXIT_CODE_TWO)
+        }
+    }
     if let subcommandParser: any SubCommandParserProtocol = subcommandParsers[subcommand] {
         return subcommandParser.parse(args: args.slice(1...).orDie())
     } else if let translated = translateHyprlandDispatcher(args.toArray()) {

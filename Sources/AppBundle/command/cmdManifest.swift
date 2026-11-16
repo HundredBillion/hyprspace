@@ -70,6 +70,14 @@ extension CmdArgs {
                 command = MoveWorkspaceToMonitorCommand(args: self as! MoveWorkspaceToMonitorCmdArgs)
             case .pin:
                 command = PinCommand(args: self as! PinCmdArgs)
+            case .pseudo:
+                command = PseudoCommand(args: self as! PseudoCmdArgs)
+            case .group:
+                command = GroupCommand(args: self as! GroupCmdArgs)
+            case .centerwindow:
+                command = CenterWindowCommand(args: self as! CenterWindowCmdArgs)
+            case .moveactive:
+                command = MoveActiveCommand(args: self as! MoveActiveCmdArgs)
             case .layoutmsg:
                 command = LayoutMsgCommand(args: self as! LayoutMsgCmdArgs)
             case .resizeactive:

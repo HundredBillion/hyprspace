@@ -37,6 +37,7 @@ final class MacWindow: Window {
         let data = unbindAndGetBindingData(windowType, workspace, window: nil)
         let window = MacWindow(windowId, macApp, lastFloatingSize: rect?.size, parent: data.parent, adaptiveWeight: data.adaptiveWeight, index: data.index)
         allWindowsMap[windowId] = window
+        window.playOpenAnimation = !isStartup
 
         try await debugWindowsIfRecording(window, .cancellable)
         if try await !restoreClosedWindowsCacheIfNeeded(newlyDetectedWindow: window) {
@@ -137,6 +138,8 @@ final class MacWindow: Window {
     @MainActor
     override func hideInCorner(_ corner: OptimalHideCorner) async throws {
         guard let nodeMonitorInfo else { return }
+        if isSlidingOut(windowId) { return } // The animation puts the window in the corner once it's over
+        var rectBeforeHiding: Rect? = nil
         // Don't accidentally override prevUnhiddenEmulationPosition in case of subsequent `hideInCorner` calls
         if !isHiddenInCorner {
             guard let windowRect = try await getAxRect(.cancellable) else { return }
@@ -150,6 +153,7 @@ final class MacWindow: Window {
                 if isFloating {
                     lastFloatingSize = windowRect.size
                 }
+                rectBeforeHiding = windowRect
             }
         }
         let p: CGPoint
@@ -165,6 +169,12 @@ final class MacWindow: Window {
                 // todo this ad hoc won't be necessary once I implement optimization suggested by Zalim
                 let onePixelOffset = macApp.appId == .zoom ? .zero : CGPoint(x: 1, y: 1)
                 p = nodeMonitorInfo.visibleRect.bottomRightCorner - onePixelOffset
+        }
+        // The window has just become invisible because of the workspace switch. It slides out of the monitor
+        if let rectBeforeHiding, isWorkspaceSwitchAnimated,
+           slideOut(from: rectBeforeHiding, to: incomingWorkspaceSlideSide.opposite, monitor: nodeMonitorInfo.rect, finalPosition: p)
+        {
+            return
         }
         setAxFrame(p, nil)
     }

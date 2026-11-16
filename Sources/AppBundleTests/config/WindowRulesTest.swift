@@ -46,11 +46,11 @@ struct WindowRulesTest {
         )
         assertEquals(
             parseConfig("windowrule = ['explode, class:Foo']").strErrors,
-            ["[ERROR] windowrule[0]: Can't parse window rule 'explode'. Supported rules: float, tile, pin, fullscreen, workspace <name> [silent]"],
+            ["[ERROR] windowrule[0]: Can't parse window rule 'explode'. Supported rules: float, tile, pin, fullscreen, maximize, pseudo, center, size <w> <h>, move <x> <y>, workspace <name> [silent]"],
         )
         assertEquals(
             parseConfig("windowrule = ['float, pid:42']").strErrors,
-            ["[ERROR] windowrule[0]: Can't parse window rule matcher 'pid:42'. Supported matchers: 'class:<regex>', 'title:<regex>'"],
+            ["[ERROR] windowrule[0]: Can't parse window rule matcher 'pid:42'. Supported matchers: 'class:<regex>', 'title:<regex>', 'workspace:<name>'"],
         )
     }
 

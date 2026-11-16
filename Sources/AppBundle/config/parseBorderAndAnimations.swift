@@ -3,7 +3,8 @@ import Common
 private let borderParserTable: [String: any ParserProtocol<BorderConfig>] = [
     "enabled": Parser(\.enabled, parseBool),
     "width": Parser(\.width, parseSmallNonNegativeInt),
-    "active-color": Parser(\.activeColor, parseColor),
+    "active-color": Parser(\.activeColor, parseBorderColor),
+    "inactive-color": Parser(\.inactiveColor, parseBorderColor),
     "rounding": Parser(\.rounding, parseSmallNonNegativeInt),
 ]
 
@@ -14,6 +15,8 @@ func parseBorderConfig(_ raw: OrderedJson, _ backtrace: ConfigBacktrace, _ c: in
 private let animationsParserTable: [String: any ParserProtocol<AnimationsConfig>] = [
     "enabled": Parser(\.enabled, parseBool),
     "duration-ms": Parser(\.durationMs, parseAnimationDuration),
+    "window-open": Parser(\.windowOpen, parseBool),
+    "workspace-switch": Parser(\.workspaceSwitch, parseBool),
 ]
 
 func parseAnimationsConfig(_ raw: OrderedJson, _ backtrace: ConfigBacktrace, _ c: inout ConfigParserContext) -> AnimationsConfig {
@@ -36,11 +39,8 @@ private func parseAnimationDuration(_ raw: OrderedJson, _ backtrace: ConfigBackt
     }
 }
 
-private func parseColor(_ raw: OrderedJson, _ backtrace: ConfigBacktrace) -> ResOrConfigParseDiagnostic<RgbaColor> {
+private func parseBorderColor(_ raw: OrderedJson, _ backtrace: ConfigBacktrace) -> ResOrConfigParseDiagnostic<BorderColor?> {
     parseString(raw, backtrace).flatMap {
-        RgbaColor.parse($0).toResult(.init(
-            backtrace,
-            "Can't parse color '\($0)'. Supported formats: '#rrggbb', '#rrggbbaa', 'rgb(rrggbb)', 'rgba(rrggbbaa)', '0xaarrggbb'",
-        ))
+        BorderColor.parse($0).toResult(.init(backtrace, "Can't parse color '\($0)'. \(BorderColor.supportedFormats)"))
     }
 }

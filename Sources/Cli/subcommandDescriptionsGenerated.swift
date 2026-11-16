@@ -3,6 +3,7 @@
 
 let subcommandDescriptions = [
     ["  balance-sizes", "Balance sizes of all windows in the current workspace"],
+    ["  centerwindow", "Center the focused floating window on its monitor"],
     ["  close-all-windows-but-current", "On the focused workspace, close all windows but current"],
     ["  close", "Close the focused window"],
     ["  config", "Query HyprSpace config options"],
@@ -16,6 +17,7 @@ let subcommandDescriptions = [
     ["  focus-monitor", "Focus monitor by relative direction, by order, or by pattern"],
     ["  focus", "Set focus to a window."],
     ["  fullscreen", "Toggle the fullscreen mode for the focused window"],
+    ["  group", "Group windows into one tile, like the tabbed groups of Hyprland"],
     ["  join-with", "Put the focused window and the nearest node in the specified direction under a common parent container"],
     ["  layout", "Change layout of the focused node to the given layout"],
     ["  layoutmsg", "Send a message to the dwindle or master layout"],
@@ -33,7 +35,9 @@ let subcommandDescriptions = [
     ["  move-node-to-workspace", "Move the focused window to the specified workspace"],
     ["  move-workspace-to-monitor", "Move workspace to monitor targeted by relative direction, by order, or by pattern."],
     ["  move", "Move the focused window in the given direction"],
+    ["  moveactive", "Move the focused floating window by the given amount of pixels"],
     ["  pin", "Toggle whether the focused floating window is shown on all workspaces"],
+    ["  pseudo", "Toggle pseudotiling of the focused window"],
     ["  reload-config", "Reload currently active config"],
     ["  resize", "Resize the focused window"],
     ["  resizeactive", "Resize the focused window by the given amount of pixels"],

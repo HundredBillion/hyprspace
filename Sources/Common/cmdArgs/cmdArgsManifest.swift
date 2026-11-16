@@ -2,6 +2,7 @@ public enum CmdKind: String, CaseIterable, Equatable, Sendable {
     // Sorted
 
     case balanceSizes = "balance-sizes"
+    case centerwindow
     case close
     case closeAllWindowsButCurrent = "close-all-windows-but-current"
     case config
@@ -18,6 +19,7 @@ public enum CmdKind: String, CaseIterable, Equatable, Sendable {
     case focusBackAndForth = "focus-back-and-forth"
     case focusMonitor = "focus-monitor"
     case fullscreen
+    case group
     case joinWith = "join-with"
     case layout
     case layoutmsg
@@ -31,11 +33,13 @@ public enum CmdKind: String, CaseIterable, Equatable, Sendable {
     case macosNativeMinimize = "macos-native-minimize"
     case mode
     case move = "move"
+    case moveactive
     case moveMouse = "move-mouse"
     case moveNodeToMonitor = "move-node-to-monitor"
     case moveNodeToWorkspace = "move-node-to-workspace"
     case moveWorkspaceToMonitor = "move-workspace-to-monitor"
     case pin
+    case pseudo
     case reloadConfig = "reload-config"
     case resize
     case resizeactive
@@ -128,6 +132,14 @@ func initSubcommands() -> [String: any SubCommandParserProtocol] {
                 result["move-workspace-to-display"] = SubCommandParser(MoveWorkspaceToMonitorCmdArgs.init)
             case .pin:
                 result[kind.rawValue] = SubCommandParser(PinCmdArgs.init)
+            case .pseudo:
+                result[kind.rawValue] = SubCommandParser(PseudoCmdArgs.init)
+            case .group:
+                result[kind.rawValue] = SubCommandParser(GroupCmdArgs.init)
+            case .centerwindow:
+                result[kind.rawValue] = SubCommandParser(CenterWindowCmdArgs.init)
+            case .moveactive:
+                result[kind.rawValue] = SubCommandParser(MoveActiveCmdArgs.init)
             case .layoutmsg:
                 result[kind.rawValue] = SubCommandParser(LayoutMsgCmdArgs.init)
             case .resizeactive:

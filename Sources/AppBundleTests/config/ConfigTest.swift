@@ -21,7 +21,7 @@ struct ConfigTest {
         assertEquals(result.errors, [])
         assertEquals(result.warnings, [])
         assertEquals(result.config.newWindowPlacement, .dwindle)
-        assertEquals(result.config.modes[mainModeId]?.bindings.count, 44)
+        assertEquals(result.config.modes[mainModeId]?.bindings.count, 46)
         assertEquals(result.config.windowRules.count, 2)
     }
 

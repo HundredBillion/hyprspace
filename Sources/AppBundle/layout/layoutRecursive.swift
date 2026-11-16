@@ -5,7 +5,8 @@ extension Workspace {
     @MainActor
     func layoutWorkspace() async throws { // todo revisit API
         if isEffectivelyEmpty { return }
-        let rect = workspaceMonitorInfo.visibleRectPaddedByOuterGaps
+        let isSmartGaps = config.gaps.smart && rootTilingContainer.allInhabitedLeafWindowsRecursive.count == 1
+        let rect = isSmartGaps ? workspaceMonitorInfo.visibleRect : workspaceMonitorInfo.visibleRectPaddedByOuterGaps
         // If monitors are aligned vertically and the monitor below has smaller width, then macOS may not allow the
         // window on the upper monitor to take full width. rect.height - 1 resolves this problem
         // But I also faced this problem in monitors horizontal configuration. ¯\_(ツ)_/¯
@@ -44,8 +45,20 @@ extension TreeNode {
                         lastAppliedLayoutPhysicalRect = nil
                         window.layoutFullscreen(context)
                     } else {
+                        // A pseudotiled window keeps its own size. It's centered inside of its tile
+                        let physicalRect = window.pseudotiledSize.map {
+                            centeredRect(of: CGSize(width: min($0.width, width), height: min($0.height, height)), in: physicalRect)
+                        } ?? physicalRect
                         // After a mouse drag the window is already where the user left it. Don't animate from the stale rect
-                        let oldRect = window.skipNextAnimation ? nil : lastAppliedLayoutPhysicalRect
+                        var oldRect = window.skipNextAnimation ? nil : lastAppliedLayoutPhysicalRect
+                        if let side = window.slideInFrom {
+                            // The window has been hidden in the corner. It slides in from the side of the monitor
+                            oldRect = slidOutRect(physicalRect, to: side, monitor: context.workspace.workspaceMonitorInfo.rect)
+                        } else if oldRect == nil && window.playOpenAnimation && !window.skipNextAnimation && config.animations.windowOpen {
+                            oldRect = popinStartRect(physicalRect)
+                        }
+                        window.slideInFrom = nil
+                        window.playOpenAnimation = false
                         window.skipNextAnimation = false
                         lastAppliedLayoutPhysicalRect = physicalRect
                         window.isFullscreen = false

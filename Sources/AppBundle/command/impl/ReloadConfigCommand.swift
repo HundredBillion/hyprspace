@@ -58,6 +58,7 @@ struct ReloadConfigResult {
         await activateMode_nonCancellable(activeMode)
         syncStartAtLogin()
         syncFocusFollowsMouse(config)
+        syncMouseDragModifier(config)
         syncConfigFileWatcher()
     }
 

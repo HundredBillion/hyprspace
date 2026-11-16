@@ -52,6 +52,8 @@ struct Config: Withable {
     var keyMapping = KeyMapping()
     var execConfig: ExecConfig = ExecConfig()
     var focusFollowsMouse: FocusFollowsMouse = FocusFollowsMouse()
+    /// Hold the modifier and drag a window with the left mouse button to move it, with the right one to resize it
+    var mouseDragModifier: MouseDragModifier? = nil
     var border: BorderConfig = BorderConfig()
     var animations: AnimationsConfig = AnimationsConfig()
 
@@ -71,18 +73,62 @@ struct FocusFollowsMouse: Withable {
     var enabled: Bool = false
 }
 
-/// Border around the focused window. Hyprland: general:border_size, general:col.active_border, decoration:rounding
+/// Borders around windows.
+/// Hyprland: general:border_size, general:col.active_border, general:col.inactive_border, decoration:rounding
 struct BorderConfig: Withable, Equatable {
     var enabled: Bool = true
     var width: Int = 2
-    var activeColor: RgbaColor = RgbaColor(red: 0x33 / 255.0, green: 0xcc / 255.0, blue: 0xff / 255.0, alpha: 0xee / 255.0)
+    /// nil means "no border"
+    var activeColor: BorderColor? = BorderColor(RgbaColor(red: 0x33 / 255.0, green: 0xcc / 255.0, blue: 0xff / 255.0, alpha: 0xee / 255.0))
+    /// nil means "no border"
+    var inactiveColor: BorderColor? = BorderColor(RgbaColor(red: 0x59 / 255.0, green: 0x59 / 255.0, blue: 0x59 / 255.0, alpha: 0xaa / 255.0))
     var rounding: Int = 10
+}
+
+/// A solid color or a linear gradient. Hyprland: 'rgba(33ccffee) rgba(00ff99ee) 45deg'
+struct BorderColor: Equatable {
+    var colors: [RgbaColor]
+    var angleDegrees: Double
+
+    init(_ color: RgbaColor) {
+        colors = [color]
+        angleDegrees = 0
+    }
+
+    init(colors: [RgbaColor], angleDegrees: Double) {
+        self.colors = colors
+        self.angleDegrees = angleDegrees
+    }
+
+    static let maxColors = 10
+    static let supportedFormats = "One color: '#rrggbb', '#rrggbbaa', 'rgb(rrggbb)', 'rgba(rrggbbaa)', '0xaarrggbb'. " +
+        "Gradient: several colors and an optional angle separated by spaces: 'rgba(33ccffee) rgba(00ff99ee) 45deg'. " +
+        "No border: 'none'"
+
+    /// - Returns: `.some(nil)` for 'none', `nil` if the string can't be parsed
+    static func parse(_ raw: String) -> BorderColor?? {
+        var words = raw.split(whereSeparator: \.isWhitespace).map(String.init)
+        if words == ["none"] { return .some(nil) }
+        var angle: Double = 0
+        if let last = words.last, last.lowercased().hasSuffix("deg") {
+            guard let parsed = Double(last.dropLast(3)), parsed.isFinite else { return nil }
+            angle = parsed
+            words.removeLast()
+        }
+        let colors = words.compactMap(RgbaColor.parse)
+        if colors.isEmpty || colors.count != words.count || colors.count > maxColors { return nil }
+        return BorderColor(colors: colors, angleDegrees: angle)
+    }
 }
 
 /// Hyprland: animations:enabled
 struct AnimationsConfig: Withable, Equatable {
     var enabled: Bool = true
     var durationMs: Int = 150
+    /// New windows pop in: they grow to their size
+    var windowOpen: Bool = true
+    /// Windows slide in and out when the workspace is switched
+    var workspaceSwitch: Bool = true
 }
 
 struct RgbaColor: Equatable {

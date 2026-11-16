@@ -21,7 +21,7 @@ struct BorderAndAnimationsTest {
         assertEquals(result.config.border.enabled, false)
         assertEquals(result.config.border.width, 4)
         assertEquals(result.config.border.rounding, 0)
-        assertEquals(result.config.border.activeColor, RgbaColor(red: 1, green: 0, blue: 0, alpha: 128 / 255.0))
+        assertEquals(result.config.border.activeColor, BorderColor(RgbaColor(red: 1, green: 0, blue: 0, alpha: 128 / 255.0)))
         assertEquals(result.config.animations, AnimationsConfig(enabled: false, durationMs: 300))
     }
 
@@ -35,7 +35,7 @@ struct BorderAndAnimationsTest {
     @Test func testParseErrors() {
         assertEquals(
             parseConfig("border.active-color = 'blue'").strErrors,
-            ["[ERROR] border.active-color: Can't parse color 'blue'. Supported formats: '#rrggbb', '#rrggbbaa', 'rgb(rrggbb)', 'rgba(rrggbbaa)', '0xaarrggbb'"],
+            ["[ERROR] border.active-color: Can't parse color 'blue'. \(BorderColor.supportedFormats)"],
         )
         assertEquals(parseConfig("border.width = -1").strErrors, ["[ERROR] border.width: The value must be between 0 and 1000"])
         assertEquals(parseConfig("animations.duration-ms = -5").strErrors, ["[ERROR] animations.duration-ms: The value must be between 0 and 2000"])
@@ -44,6 +44,55 @@ struct BorderAndAnimationsTest {
             parseConfig("animations.duration-ms = 9223372036854775807").strErrors,
             ["[ERROR] animations.duration-ms: The value must be between 0 and 2000"],
         )
+    }
+
+    @Test func testParseBorderColor() {
+        let red = RgbaColor(red: 1, green: 0, blue: 0, alpha: 1)
+        let blue = RgbaColor(red: 0, green: 0, blue: 1, alpha: 1)
+        assertEquals(BorderColor.parse("#ff0000"), BorderColor(red))
+        assertEquals(BorderColor.parse("rgba(ff0000ff) rgba(0000ffff) 45deg"), BorderColor(colors: [red, blue], angleDegrees: 45))
+        assertEquals(BorderColor.parse("#ff0000 #0000ff"), BorderColor(colors: [red, blue], angleDegrees: 0))
+        assertEquals(BorderColor.parse("none"), .some(nil))
+        assertEquals(BorderColor.parse("45deg"), nil)
+        assertEquals(BorderColor.parse("#ff0000 blue"), nil)
+        assertEquals(BorderColor.parse("#ff0000 nandeg"), nil)
+        assertEquals(BorderColor.parse(""), nil)
+
+        let config = parseConfig("border.inactive-color = 'none'\nborder.active-color = '#ff0000 #0000ff 90deg'")
+        assertEquals(config.errors, [])
+        assertEquals(config.config.border.inactiveColor, nil)
+        assertEquals(config.config.border.activeColor, BorderColor(colors: [red, blue], angleDegrees: 90))
+        #expect(parseConfig("").config.border.inactiveColor != nil)
+
+        // 0deg goes from left to right. 90deg goes from top to bottom (the Y axis of layers points up)
+        assertEquals(gradientPoints(angleDegrees: 0).start.x, 0)
+        assertEquals(gradientPoints(angleDegrees: 0).end.x, 1)
+        assertEquals(abs(gradientPoints(angleDegrees: 90).start.y - 1) < 1e-9, true)
+        assertEquals(abs(gradientPoints(angleDegrees: 90).end.y) < 1e-9, true)
+    }
+
+    @Test func testOpenAndWorkspaceAnimations() {
+        let parsed = parseConfig("animations.window-open = false\nanimations.workspace-switch = false")
+        assertEquals(parsed.errors, [])
+        assertEquals(parsed.config.animations.windowOpen, false)
+        assertEquals(parsed.config.animations.workspaceSwitch, false)
+        assertEquals(parseConfig("").config.animations.windowOpen, true)
+        assertEquals(parseConfig("").config.animations.workspaceSwitch, true)
+
+        // The popin animation starts from a smaller rect with the same center
+        let target = Rect(topLeftX: 100, topLeftY: 200, width: 1000, height: 500)
+        let popin = popinStartRect(target)
+        assertEquals([popin.width, popin.height], [870, 435])
+        assertEquals([popin.center.x, popin.center.y], [target.center.x, target.center.y])
+
+        // One pixel of the window stays on the monitor
+        let monitor = Rect(topLeftX: 0, topLeftY: 0, width: 1920, height: 1080)
+        assertEquals(slidOutRect(target, to: .left, monitor: monitor).topLeftX, -999)
+        assertEquals(slidOutRect(target, to: .right, monitor: monitor).topLeftX, 1919)
+        assertEquals(slidOutRect(target, to: .right, monitor: monitor).topLeftY, 200)
+
+        // Animations are never played in tests
+        assertEquals(isWorkspaceSwitchAnimated, false)
     }
 
     @Test func testParseColor() {

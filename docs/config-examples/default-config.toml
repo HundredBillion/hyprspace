@@ -71,18 +71,30 @@ focus-follows-mouse.enabled = false
 # See docs/guide.adoc#key-mapping
 key-mapping.preset = 'qwerty'
 
-# Border around the focused window
-# 'active-color' formats: '#rrggbb', '#rrggbbaa', 'rgb(rrggbb)', 'rgba(rrggbbaa)', '0xaarrggbb'
+# Borders around windows
+# Color formats: '#rrggbb', '#rrggbbaa', 'rgb(rrggbb)', 'rgba(rrggbbaa)', '0xaarrggbb'
+# Gradient: several colors and an optional angle separated by spaces: 'rgba(33ccffee) rgba(00ff99ee) 45deg'
+# 'none' disables the border of the focused (active-color) or of the other (inactive-color) windows
 # 'rounding' should match the corner radius of macOS windows
 border.enabled = true
 border.width = 2
 border.active-color = '#33ccffee'
+border.inactive-color = '#595959aa'
 border.rounding = 10
 
 # Window animations. Windows glide to their new position when the layout changes
 # Set 'animations.enabled = false' if windows of some apps feel sluggish
+# 'window-open': new windows pop in (they grow to their size)
+# 'workspace-switch': windows slide in and out when the workspace is switched. Only played with a single monitor
 animations.enabled = true
 animations.duration-ms = 150
+animations.window-open = true
+animations.workspace-switch = true
+
+# Hold the modifier and drag anywhere on a window to move it (left mouse button) or to resize it (right mouse button)
+# The app under the cursor doesn't see those clicks
+# Possible values: 'off' or modifiers joined with a dash: (alt|ctrl|cmd|shift). Example: 'alt', 'ctrl-cmd'
+mouse-drag-modifier = 'off'
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
 # Possible values:
@@ -98,6 +110,8 @@ gaps.outer.left =       0
 gaps.outer.bottom =     0
 gaps.outer.top =        0
 gaps.outer.right =      0
+# Hyprland's "smart gaps": no outer gaps if the workspace has only one tiling window
+gaps.smart = false
 
 # 'main' binding mode declaration
 # See: docs/guide.adoc#binding-modes

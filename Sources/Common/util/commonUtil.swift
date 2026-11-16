@@ -175,6 +175,10 @@ extension Int {
 }
 
 extension String {
+    public func removePrefixOrNil(_ prefix: String) -> String? {
+        hasPrefix(prefix) ? String(dropFirst(prefix.count)) : nil
+    }
+
     public func removePrefix(_ prefix: String) -> String {
         hasPrefix(prefix) ? String(dropFirst(prefix.count)) : self
     }

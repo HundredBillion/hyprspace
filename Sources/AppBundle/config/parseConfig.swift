@@ -156,6 +156,7 @@ private let configParser: [String: any ParserProtocol<Config>] = [
 
     "gaps": Parser(\.gaps, parseGaps),
     "focus-follows-mouse": Parser(\.focusFollowsMouse, parseFocusFollowsMouse),
+    "mouse-drag-modifier": Parser(\.mouseDragModifier, parseMouseDragModifier),
     "border": Parser(\.border, parseBorderConfig),
     "animations": Parser(\.animations, parseAnimationsConfig),
     "workspace-to-monitor-force-assignment": Parser(\.workspaceToMonitorForceAssignment, parseWorkspaceToMonitorAssignment),

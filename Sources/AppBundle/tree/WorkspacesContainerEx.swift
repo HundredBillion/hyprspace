@@ -9,6 +9,8 @@ extension WorkspacesContainer {
         prevVisibleWorkspaceName = visibleWorkspaceNameOrStale
         visibleWorkspaceNameOrStale = workspace.name
         if let prevVisibleWorkspace {
+            // Workspaces are ordered from left to right, like in Hyprland
+            incomingWorkspaceSlideSide = workspace > prevVisibleWorkspace ? .right : .left
             movePinnedWindows(from: prevVisibleWorkspace, to: workspace)
         }
         return true

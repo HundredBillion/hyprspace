@@ -3,6 +3,8 @@ import Common
 struct Gaps: Withable, Equatable, Sendable {
     var inner: Inner
     var outer: Outer
+    /// Hyprland's "smart gaps": no outer gaps if the workspace has only one tiling window
+    var smart: Bool = false
 
     static let zero = Gaps(inner: .zero, outer: .zero)
 
@@ -85,6 +87,7 @@ struct ResolvedGaps {
 private let gapsParser: [String: any ParserProtocol<Gaps>] = [
     "inner": Parser(\.inner, parseInner),
     "outer": Parser(\.outer, parseOuter),
+    "smart": Parser(\.smart, parseBool),
 ]
 
 private let innerParser: [String: any ParserProtocol<Gaps.Inner>] = [

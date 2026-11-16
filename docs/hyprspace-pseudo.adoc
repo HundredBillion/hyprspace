@@ -1,0 +1,35 @@
+= hyprspace-pseudo(1)
+include::util/man-attributes.adoc[]
+// tag::purpose[]
+:manpurpose: Toggle pseudotiling of the focused window
+// end::purpose[]
+:manname: hyprspace-pseudo
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace pseudo [-h|--help] [--window-id <window-id>] [on|off]
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}.
+
+A pseudotiled window stays in the tiling layout, but it keeps its own size and it is centered inside of its tile.
+The window never grows bigger than its tile.
+
+The own size is the size the window had the last time it was floating. Half of the tile is used if that size is unknown.
+// end::body[]
+
+// =========================================================== Options
+include::util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+--window-id <window-id>:: Act on the specified window instead of the focused window
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]

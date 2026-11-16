@@ -1,0 +1,42 @@
+= hyprspace-group(1)
+include::util/man-attributes.adoc[]
+// tag::purpose[]
+:manpurpose: Group windows into one tile, like the tabbed groups of Hyprland
+// end::purpose[]
+:manname: hyprspace-group
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace group [-h|--help] [--window-id <window-id>] (toggle|next|prev|move-in <direction>|move-out)
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}.
+
+A group is a tiling container with the accordion layout: its windows share one tile and are stacked on top of each other.
+
+* `toggle` groups the focused window with the windows it shares a container with, or dissolves the group
+* `next` and `prev` focus the next and the previous window of the group. The focus wraps around
+* `move-in (left|down|up|right)` moves the focused window into the group in the given direction.
+  If the neighbor isn't in a group yet, the neighbor and the focused window become a new group
+* `move-out` moves the focused window out of its group
+
+New windows join the group of the focused window.
+
+The Hyprland dispatchers `togglegroup`, `changegroupactive [f|b]`, `moveintogroup (l|r|u|d)` and `moveoutofgroup` are aliases.
+// end::body[]
+
+// =========================================================== Options
+include::util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+--window-id <window-id>:: Act on the specified window instead of the focused window
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]

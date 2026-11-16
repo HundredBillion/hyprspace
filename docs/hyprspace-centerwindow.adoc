@@ -1,0 +1,32 @@
+= hyprspace-centerwindow(1)
+include::util/man-attributes.adoc[]
+// tag::purpose[]
+:manpurpose: Center the focused floating window on its monitor
+// end::purpose[]
+:manname: hyprspace-centerwindow
+
+// =========================================================== Synopsis
+== Synopsis
+[verse]
+// tag::synopsis[]
+hyprspace centerwindow [-h|--help] [--window-id <window-id>]
+
+// end::synopsis[]
+
+// =========================================================== Description
+== Description
+
+// tag::body[]
+{manpurpose}.
+
+Only floating windows can be centered. The command fails for tiling windows.
+// end::body[]
+
+// =========================================================== Options
+include::util/conditional-options-header.adoc[]
+
+-h, --help:: Print help
+--window-id <window-id>:: Act on the specified window instead of the focused window
+
+// =========================================================== Footer
+include::util/man-footer.adoc[]

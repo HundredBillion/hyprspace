@@ -9,7 +9,7 @@ include::util/man-attributes.adoc[]
 == Synopsis
 [verse]
 // tag::synopsis[]
-hyprspace resizeactive [-h|--help] [exact] <x> <y>
+hyprspace resizeactive [-h|--help] [--window-id <window-id>] [exact] <x> <y>
 
 // end::synopsis[]
 
@@ -23,13 +23,15 @@ hyprspace resizeactive [-h|--help] [exact] <x> <y>
 
 With `exact`, `<x>` and `<y>` are the new width and height instead of the difference.
 
-The command only supports tiling windows.
+Floating windows are resized directly. With `exact`, their size can also be a percentage of the monitor: `resizeactive exact 50% 50%`.
+Tiling windows are resized by changing the weights of the tiles.
 // end::body[]
 
 // =========================================================== Options
 include::util/conditional-options-header.adoc[]
 
 -h, --help:: Print help
+--window-id <window-id>:: Act on the specified window instead of the focused window
 
 // =========================================================== Footer
 include::util/man-footer.adoc[]
