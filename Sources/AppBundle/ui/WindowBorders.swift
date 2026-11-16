@@ -160,9 +160,69 @@ func borderFrame(windowRect: Rect, borderWidth: CGFloat, mainMonitorHeight: CGFl
     )
 }
 
+/// Apps are free to ignore the frame that the layout asks for: a window has a minimal size, a terminal snaps its
+/// size to the size of a character. The border must go around the window as it is, not around its tile.
+/// The value is the real frame of a tiling window whose tile is `layout`
+@MainActor private var realFrames: [OpaqueWindowId: (layout: Rect, real: Rect)] = [:]
+@MainActor private var reconcileBordersTask: Task<(), any Error>? = nil
+
+/// The frames of the windows on the screen as the window server knows them, by the window ID of macOS.
+/// The coordinate system is the same as in `Rect`. Doesn't talk to other apps
+func onScreenWindowFrames() -> [UInt32: Rect] {
+    let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
+    guard let windows = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else { return [:] }
+    var result: [UInt32: Rect] = [:]
+    for window in windows {
+        guard let number = window[kCGWindowNumber as String] as? UInt32,
+              let bounds = window[kCGWindowBounds as String] as? NSDictionary,
+              let frame = CGRect(dictionaryRepresentation: bounds)
+        else { continue }
+        result[number] = Rect(topLeftX: frame.minX, topLeftY: frame.minY, width: frame.width, height: frame.height)
+    }
+    return result
+}
+
 /// Doesn't talk to other apps: it only uses the rects that the layout pass already knows
 @MainActor
 func refreshWindowBorders() {
+    syncWindowBorders()
+    if isUnitTest || !config.border.enabled { return }
+    // The apps need time to apply the frames of the layout (and the animation needs time to finish).
+    // Then the borders are compared against the real frames of the windows
+    reconcileBordersTask?.cancel()
+    reconcileBordersTask = Task.startUnstructured { @MainActor in
+        try await Task.sleep(for: .milliseconds(min(max(config.animations.durationMs, 0), maxAnimationDurationMs) + 150))
+        if updateRealFrames(onScreenWindowFrames()) { syncWindowBorders() }
+    }
+}
+
+/// - Returns: true if the real frame of some window has changed
+@MainActor
+private func updateRealFrames(_ onScreen: [UInt32: Rect]) -> Bool {
+    var updated: [OpaqueWindowId: (layout: Rect, real: Rect)] = [:]
+    for workspace in Workspace.all where workspace.isVisible {
+        for window in workspace.allLeafWindowsRecursive where window.parent is TilingContainer {
+            guard animatedRect(of: window.windowId) == nil, // The window is still on its way
+                  let layout = window.lastAppliedLayoutPhysicalRect,
+                  let nativeWindowId = (window as? MacWindow).flatMap({ $0.macApp.nativeWindowId(of: $0.windowId) }),
+                  let real = onScreen[nativeWindowId],
+                  isFrameMismatch(layout: layout, real: real)
+            else { continue }
+            updated[window.windowId] = (layout, real)
+        }
+    }
+    let isChanged = updated.count != realFrames.count || updated.contains { id, value in
+        realFrames[id].map { $0.layout.isAlmostEqual(to: value.layout, tolerance: 0) && $0.real.isAlmostEqual(to: value.real, tolerance: 0) } != true
+    }
+    realFrames = updated
+    return isChanged
+}
+
+/// The window didn't take the frame of its tile. A pixel of difference is not worth a different border
+func isFrameMismatch(layout: Rect, real: Rect) -> Bool { !real.isAlmostEqual(to: layout, tolerance: 1) }
+
+@MainActor
+private func syncWindowBorders() {
     if isUnitTest { return }
     guard config.border.enabled, TrayMenuModel.shared.isEnabled else {
         WindowBorders.shared.sync([])
@@ -194,8 +254,17 @@ private func borderRect(of window: Window) -> Rect? {
     if window.isFullscreen || window.isHiddenInCorner { return nil }
     if window.windowId == currentlyManipulatedWithMouseWindowId { return nil } // The rect is stale while the user drags the window
     return switch window.parent {
-        // The window is on its way. The animation keeps moving the border
-        case is TilingContainer: animatedRect(of: window.windowId) ?? window.lastAppliedLayoutPhysicalRect
+        case is TilingContainer:
+            // The window is on its way. The animation keeps moving the border
+            if let animated = animatedRect(of: window.windowId) {
+                animated
+            } else if let layout = window.lastAppliedLayoutPhysicalRect, let known = realFrames[window.windowId],
+                      known.layout.isAlmostEqual(to: layout, tolerance: 0)
+            {
+                known.real // The window didn't take the frame of its tile
+            } else {
+                window.lastAppliedLayoutPhysicalRect
+            }
         case is FloatingWindowsContainer: window.lastKnownFloatingRect
         default: nil // macOS native fullscreen, minimized windows, popups, windows of hidden apps
     }
