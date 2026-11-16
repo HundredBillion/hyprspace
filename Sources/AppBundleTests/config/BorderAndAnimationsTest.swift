@@ -95,6 +95,16 @@ struct BorderAndAnimationsTest {
         assertEquals(isWorkspaceSwitchAnimated, false)
     }
 
+    @Test func testBorderFollowsTheRealFrameOfTheWindow() {
+        let tile = Rect(topLeftX: 20, topLeftY: 53, width: 360, height: 908)
+        // A pixel of difference is not a mismatch
+        assertEquals(isFrameMismatch(layout: tile, real: Rect(topLeftX: 20, topLeftY: 53, width: 361, height: 908)), false)
+        // The window has a minimal width and it is wider than its tile
+        assertEquals(isFrameMismatch(layout: tile, real: Rect(topLeftX: 20, topLeftY: 53, width: 500, height: 908)), true)
+        // The frames of the windows on the screen can be read without talking to other apps. The test only checks that it doesn't crash
+        _ = onScreenWindowFrames()
+    }
+
     @Test func testParseColor() {
         assertEquals(RgbaColor.parse("#ff0000"), RgbaColor(red: 1, green: 0, blue: 0, alpha: 1))
         assertEquals(RgbaColor.parse("#00FF0000"), RgbaColor(red: 0, green: 1, blue: 0, alpha: 0))
