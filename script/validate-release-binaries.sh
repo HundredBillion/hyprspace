@@ -97,6 +97,7 @@ expected_app_dylibs=$(cat <<EOF
 	/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio
 	/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 	/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics
+	/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore
 	/System/Library/Frameworks/ServiceManagement.framework/Versions/A/ServiceManagement
 	/System/Library/Frameworks/SwiftUI.framework/Versions/A/SwiftUI
 	/usr/lib/libc++.1.dylib
@@ -110,7 +111,6 @@ expected_cli_dylibs=$(cat <<EOF
 	/usr/lib/libobjc.A.dylib
 	/usr/lib/libSystem.B.dylib
 	/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit
-	/usr/lib/libc++.1.dylib
 EOF
 )
 check-dylibs .release/hyprspace "$expected_cli_dylibs"
