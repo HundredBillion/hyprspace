@@ -32,8 +32,11 @@ Early work in progress. Not released, not notarized, debug builds only.
   `fullscreen (0|1)`, `fullscreenstate`, `workspace (e+1|e-1|previous|special)`, `movetoworkspace`,
   `movetoworkspacesilent`, `togglespecialworkspace`, `resizeactive`, `moveactive`, `centerwindow`, `layoutmsg`,
   `pin`, `cyclenext`, `focuscurrentorlast`, the group dispatchers and `exec`.
+- **Ready-to-use config.** [hyprspace.toml](docs/config-examples/hyprspace.toml) is a complete config you can install
+  as is: `cp docs/config-examples/hyprspace.toml ~/.hyprspace.toml`. It has Hyprland's default bindings with `alt` in
+  place of SUPER, plus vim-style `alt-h/j/k/l` keys and layout toggles.
 - **Example config.** [hyprland-like-config-example.toml](docs/config-examples/hyprland-like-config-example.toml)
-  mirrors Hyprland's default bindings, with `alt` in place of SUPER.
+  mirrors Hyprland's default bindings only.
 - Config lives at `~/.hyprspace.toml` (or `${XDG_CONFIG_HOME}/hyprspace/hyprspace.toml`). The CLI is `hyprspace`.
 
 ## What macOS does not allow

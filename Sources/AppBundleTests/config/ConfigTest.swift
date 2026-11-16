@@ -25,6 +25,15 @@ struct ConfigTest {
         assertEquals(result.config.windowRules.count, 2)
     }
 
+    @Test func testParseReadyToUseConfig() {
+        let toml = try! String(contentsOf: projectRoot.appending(component: "docs/config-examples/hyprspace.toml"), encoding: .utf8)
+        let result = parseConfig(toml)
+        assertEquals(result.errors, [])
+        assertEquals(result.warnings, [])
+        #expect(result.config.mouseDragModifier != nil)
+        #expect(result.config.modes[mainModeId]?.bindings.isEmpty == false)
+    }
+
     @Test func testEmptyConfig() {
         let result = parseConfig("")
         assertEquals(result.errors, [])
