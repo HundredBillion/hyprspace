@@ -47,7 +47,6 @@ let package = Package(
         .target(
             name: "Common",
             dependencies: [
-                .product(name: "OrderedCollections", package: "swift-collections"),
                 .target(name: "Macros"),
             ],
             swiftSettings: swiftSettings,

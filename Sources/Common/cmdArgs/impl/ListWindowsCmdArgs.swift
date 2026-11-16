@@ -1,4 +1,3 @@
-import OrderedCollections
 
 private let workspace = "<workspace>"
 private let workspaces = "\(workspace)..."

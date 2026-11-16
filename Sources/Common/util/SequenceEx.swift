@@ -1,5 +1,4 @@
 // periphery:ignore:all
-import OrderedCollections
 
 extension Sequence {
     public func filterNotNil<Unwrapped>() -> [Unwrapped] where Element == Unwrapped? { compactMap(id) }
@@ -128,7 +127,6 @@ extension Sequence {
     }
 
     public func toSet() -> Set<Element> where Element: Hashable { Set(self) }
-    public func toOrderedSet() -> OrderedSet<Element> where Element: Hashable { OrderedSet(self) }
 
     public var sequencePattern: SequencePattern<Self> {
         var iterator = makeIterator()

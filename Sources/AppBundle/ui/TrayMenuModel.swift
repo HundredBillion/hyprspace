@@ -25,16 +25,19 @@ enum AxPermissionStatus: Equatable {
 @MainActor func updateTrayText() {
     let sortedMonitors = globalSortedMonitorInfos
     let focus = globalFocus
-    TrayMenuModel.shared.trayText = (activeMode?.takeIf { $0 != mainModeId }?.first.map { "(\($0.uppercased())) " } ?? "") +
-        sortedMonitors
-        .lazy
+    let visibleWorkspaces = sortedMonitors.map { monitor in
+        let workspace = monitor.visibleWorkspace
+        return (workspace: workspace, hasFullscreenWindows: workspace.allLeafWindowsRecursive.contains { $0.isFullscreen })
+    }
+    let mode = activeMode?.takeIf { $0 != mainModeId }?.first.map { $0.uppercased() }
+    let trayText = (mode.map { "(\($0)) " } ?? "") +
+        visibleWorkspaces
         .map {
-            let hasFullscreenWindows = $0.visibleWorkspace.allLeafWindowsRecursive.contains { $0.isFullscreen }
-            let visibleWorkspaceName = hasFullscreenWindows ? "[\($0.visibleWorkspace.name)]" : $0.visibleWorkspace.name
-            return ($0.visibleWorkspace == focus.workspace && sortedMonitors.count > 1 ? "*" : "") + visibleWorkspaceName
+            let visibleWorkspaceName = $0.hasFullscreenWindows ? "[\($0.workspace.name)]" : $0.workspace.name
+            return ($0.workspace == focus.workspace && sortedMonitors.count > 1 ? "*" : "") + visibleWorkspaceName
         }
         .joined(separator: " │ ")
-    TrayMenuModel.shared.workspaces = Workspace.all.map {
+    let workspaces = Workspace.all.map {
         let apps = $0.allLeafWindowsRecursive.map { $0.app.name?.takeIf { !$0.isEmpty } }.filterNotNil().toSet()
         let dash = " - "
         let suffix = switch true {
@@ -52,22 +55,23 @@ enum AxPermissionStatus: Equatable {
             hasFullscreenWindows: hasFullscreenWindows,
         )
     }
-    var items = sortedMonitors.map {
-        let hasFullscreenWindows = $0.visibleWorkspace.allLeafWindowsRecursive.contains { $0.isFullscreen }
-        return TrayItem(
+    var items = visibleWorkspaces.map {
+        TrayItem(
             type: .workspace,
-            name: $0.visibleWorkspace.name,
-            isActive: $0.visibleWorkspace == focus.workspace,
-            hasFullscreenWindows: hasFullscreenWindows,
+            name: $0.workspace.name,
+            isActive: $0.workspace == focus.workspace,
+            hasFullscreenWindows: $0.hasFullscreenWindows,
         )
     }
-    let mode = activeMode?.takeIf { $0 != mainModeId }?.first.map {
-        TrayItem(type: .mode, name: $0.uppercased(), isActive: true, hasFullscreenWindows: false)
-    }
     if let mode {
-        items.insert(mode, at: 0)
+        items.insert(TrayItem(type: .mode, name: mode, isActive: true, hasFullscreenWindows: false), at: 0)
     }
-    TrayMenuModel.shared.trayItems = items
+    // @Published notifies its observers on every assignment, even if the value is the same.
+    // Every notification makes MenuBarLabel re-render the menu bar image, so only assign what has actually changed
+    let model = TrayMenuModel.shared
+    if model.trayText != trayText { model.trayText = trayText }
+    if model.workspaces != workspaces { model.workspaces = workspaces }
+    if model.trayItems != items { model.trayItems = items }
 }
 
 struct WorkspaceViewModel: Hashable {

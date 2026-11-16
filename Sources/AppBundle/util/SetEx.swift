@@ -1,3 +1,5 @@
+import OrderedCollections
+
 // periphery:ignore
 extension Set {
     func toArray() -> [Element] { Array(self) }
@@ -9,4 +11,8 @@ extension Set {
     @inlinable static func -= (lhs: inout Set<Element>, rhs: any Sequence<Element>) {
         lhs.subtract(rhs)
     }
+}
+
+extension Sequence where Element: Hashable {
+    func toOrderedSet() -> OrderedSet<Element> { OrderedSet(self) }
 }
