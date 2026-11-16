@@ -231,7 +231,7 @@ private func syncWindowBorders() {
     let focused = globalFocus.windowOrNil
     var borders: [WindowBorder] = []
     for workspace in Workspace.all where workspace.isVisible {
-        for window in workspace.allLeafWindowsRecursive {
+        for window in windowsWithBorder(workspace) {
             let isFocused = window == focused
             guard let color = isFocused ? config.border.activeColor : config.border.inactiveColor,
                   let rect = borderRect(of: window)
@@ -246,6 +246,15 @@ private func syncWindowBorders() {
         }
     }
     WindowBorders.shared.sync(borders)
+}
+
+/// The tiling and the floating windows of the workspace. The other windows are not on the screen: macOS native
+/// fullscreen, minimized windows, popups, windows of hidden apps.
+/// 'border.hide-on-single-window': a window that is alone on its workspace doesn't get a border
+@MainActor
+func windowsWithBorder(_ workspace: Workspace) -> [Window] {
+    let windows = workspace.allLeafWindowsRecursive.filter { $0.parent is TilingContainer || $0.parent is FloatingWindowsContainer }
+    return config.border.hideOnSingleWindow && windows.count <= 1 ? [] : windows
 }
 
 /// - Returns: nil if the window must not have a border right now

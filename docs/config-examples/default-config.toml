@@ -76,11 +76,13 @@ key-mapping.preset = 'qwerty'
 # Gradient: several colors and an optional angle separated by spaces: 'rgba(33ccffee) rgba(00ff99ee) 45deg'
 # 'none' disables the border of the focused (active-color) or of the other (inactive-color) windows
 # 'rounding' should match the corner radius of macOS windows
+# 'hide-on-single-window': a window that is alone on its workspace has no border
 border.enabled = true
 border.width = 2
 border.active-color = '#33ccffee'
 border.inactive-color = '#595959aa'
 border.rounding = 10
+border.hide-on-single-window = false
 
 # Window animations. Windows glide to their new position when the layout changes
 # Set 'animations.enabled = false' if windows of some apps feel sluggish

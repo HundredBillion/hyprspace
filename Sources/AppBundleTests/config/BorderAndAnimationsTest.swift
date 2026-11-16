@@ -106,6 +106,28 @@ struct BorderAndAnimationsTest {
         _ = onScreenWindowFrames()
     }
 
+    @Test func testHideOnSingleWindow() {
+        let parsed = parseConfig("border.hide-on-single-window = true")
+        assertEquals(parsed.errors, [])
+        assertEquals(parsed.config.border.hideOnSingleWindow, true)
+        assertEquals(parseConfig("").config.border.hideOnSingleWindow, false)
+
+        setUpWorkspacesForTests()
+        let workspace = Workspace.get(byName: name)
+        let window1 = TestWindow.new(id: 1, parent: workspace.rootTilingContainer)
+        // Windows that are not on the screen don't count
+        TestWindow.new(id: 2, parent: workspace.macOsNativeFullscreenWindowsContainer)
+        assertEquals(windowsWithBorder(workspace).map(\.windowId), [window1.windowId])
+
+        config.border.hideOnSingleWindow = true
+        assertEquals(windowsWithBorder(workspace).map(\.windowId), [])
+        // A floating window on top of the only tile brings the borders back
+        let window3 = TestWindow.new(id: 3, parent: workspace.floatingWindowsContainer)
+        assertEquals(windowsWithBorder(workspace).map(\.windowId).toSet(), [window1.windowId, window3.windowId])
+        // The other workspaces don't matter
+        assertEquals(windowsWithBorder(Workspace.get(byName: "other")).map(\.windowId), [])
+    }
+
     @Test func testParseColor() {
         assertEquals(RgbaColor.parse("#ff0000"), RgbaColor(red: 1, green: 0, blue: 0, alpha: 1))
         assertEquals(RgbaColor.parse("#00FF0000"), RgbaColor(red: 0, green: 1, blue: 0, alpha: 0))

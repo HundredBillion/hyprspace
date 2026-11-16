@@ -6,6 +6,7 @@ private let borderParserTable: [String: any ParserProtocol<BorderConfig>] = [
     "active-color": Parser(\.activeColor, parseBorderColor),
     "inactive-color": Parser(\.inactiveColor, parseBorderColor),
     "rounding": Parser(\.rounding, parseSmallNonNegativeInt),
+    "hide-on-single-window": Parser(\.hideOnSingleWindow, parseBool),
 ]
 
 func parseBorderConfig(_ raw: OrderedJson, _ backtrace: ConfigBacktrace, _ c: inout ConfigParserContext) -> BorderConfig {
