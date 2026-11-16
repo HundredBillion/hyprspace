@@ -18,7 +18,8 @@ unzip HyprSpace-v*.zip && cd HyprSpace-v*/
 xattr -dr com.apple.quarantine .          # The build is not notarized. macOS refuses to open it otherwise
 cp -R HyprSpace.app /Applications/
 cp bin/hyprspace /usr/local/bin/           # or any other directory in your PATH
-cp ../docs/config-examples/hyprspace.toml ~/.hyprspace.toml   # optional: the ready-to-use config from this repo
+# Optional: the ready-to-use config from this repo
+curl -fsSL https://raw.githubusercontent.com/HundredBillion/hyprspace/main/docs/config-examples/hyprspace.toml -o ~/.hyprspace.toml
 open -a HyprSpace
 ```
 
