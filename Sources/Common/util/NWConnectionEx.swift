@@ -68,7 +68,15 @@ extension NWConnection {
             let remaining = size - data.count
             let chunk: Result<Data, NWError> = await withCheckedContinuation { cont in
                 receive(minimumIncompleteLength: remaining, maximumLength: remaining) { data, context, isComplete, error in
-                    cont.resume(returning: error.map(Result.failure) ?? Result.success(data ?? Data()))
+                    if let error {
+                        cont.resume(returning: .failure(error))
+                    } else if let data, !data.isEmpty {
+                        cont.resume(returning: .success(data))
+                    } else {
+                        // The other side has closed the connection without an error. No more bytes are going to arrive.
+                        // An empty chunk would make the loop spin forever
+                        cont.resume(returning: .failure(.posix(.ECONNRESET)))
+                    }
                 }
             }
             switch chunk {

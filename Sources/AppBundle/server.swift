@@ -63,7 +63,11 @@ private func newConnection(_ connection: NWConnection) async { // todo add exit 
 
     while true {
         guard let rawRequest = await connection.readNonAtomic().getOrNil(onFailure: { err in
-            await answerToClient(exitCode: EXIT_CODE_TWO, stderr: "Error: \(err)")
+            // The client is still there only if it's the request that is wrong.
+            // Every client disconnects when it's done, and there is nobody to answer to then
+            if case .posix(.EMSGSIZE) = err {
+                await answerToClient(exitCode: EXIT_CODE_TWO, stderr: "Error: \(err)")
+            }
         }) else { return }
         guard let request = await ClientRequest.decodeJson(rawRequest).getOrNil(onFailure: { err in
             let msg = """
