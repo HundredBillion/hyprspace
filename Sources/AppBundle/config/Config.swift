@@ -83,6 +83,8 @@ struct BorderConfig: Withable, Equatable {
     /// nil means "no border"
     var inactiveColor: BorderColor? = BorderColor(RgbaColor(red: 0x59 / 255.0, green: 0x59 / 255.0, blue: 0x59 / 255.0, alpha: 0xaa / 255.0))
     var rounding: Int = 10
+    /// A window that is alone on its workspace has no border: there is nothing to tell it apart from
+    var hideOnSingleWindow: Bool = false
 }
 
 /// A solid color or a linear gradient. Hyprland: 'rgba(33ccffee) rgba(00ff99ee) 45deg'
