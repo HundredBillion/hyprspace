@@ -52,6 +52,8 @@ If you only plan to build the debug version of HyprSpace, you can run it from th
 
 **Release build**
 -   `build-release.sh` - Build release build to `.release` dir by using Xcode.
+    The binaries are universal (x86_64 and arm64). `--arch arm64` builds half as big binaries
+    that only run on Apple Silicon Macs
 -   `install-from-sources.sh` - Build release build from sources and install it as `hyprspace-dev` brew cask.
     This script is "work in progress".
     Use it on your own risk.

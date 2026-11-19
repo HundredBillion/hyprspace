@@ -2,6 +2,9 @@
 cd "$(dirname "$0")/.."
 source ./script/setup.sh
 
+# Set by build-release.sh. Releases are universal
+read -r -a archs <<< "${HYPRSPACE_RELEASE_ARCHS:-x86_64 arm64}"
+
 expected_layout=$(cat <<EOF
 .release/HyprSpace.app
 .release/HyprSpace.app/Contents
@@ -29,11 +32,8 @@ check-equals() {
 
 check-equals ".release/HyprSpace.app layout" "$expected_layout" "$(find .release/HyprSpace.app)"
 
-check-universal-binary() {
-    if ! file "$1" | grep --fixed-string -q "Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64"; then
-        echo "$1 is not a universal binary"
-        exit 1
-    fi
+check-architectures() {
+    check-equals "$1 architectures" "$(printf '%s\n' "${archs[@]}" | sort)" "$(lipo -archs "$1" | tr ' ' '\n' | sort)"
 }
 
 check-contains-hash() {
@@ -52,13 +52,13 @@ check-no-rpath-dylibs() {
 }
 
 check-rpaths() {
-    for arch in x86_64 arm64; do
+    for arch in "${archs[@]}"; do
         check-equals "$1 ($arch) rpaths" "$2" "$(xcrun objdump --macho --rpaths --no-leading-headers --arch "$arch" "$1")"
     done
 }
 
 check-dylibs() {
-    for arch in x86_64 arm64; do
+    for arch in "${archs[@]}"; do
         check-equals "$1 ($arch) dylibs" "$2" "$(xcrun objdump --macho --dylibs-used --no-leading-headers --arch "$arch" "$1" |
             sed -E 's/ \(compatibility version [^)]*, weak\)$/ (weak)/; s/ \(compatibility version [^)]*\)$//' |
             # Allow anything from /usr/lib/swift. Different Xcode versions link slightly different dylibs
@@ -110,8 +110,8 @@ EOF
 )
 check-dylibs .release/hyprspace "$expected_cli_dylibs"
 
-check-universal-binary .release/HyprSpace.app/Contents/MacOS/HyprSpace
-check-universal-binary .release/hyprspace
+check-architectures .release/HyprSpace.app/Contents/MacOS/HyprSpace
+check-architectures .release/hyprspace
 
 codesign -v .release/HyprSpace.app
 codesign -v .release/hyprspace
