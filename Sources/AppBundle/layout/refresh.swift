@@ -32,9 +32,7 @@ func runHeavyCompleteRefreshSession(
     if !TrayMenuModel.shared.isEnabled { return }
     let res = await Result {
         try await $refreshSessionEvent.withValue(event) {
-            let nativeFocused = try await getNativeFocusedWindow(.cancellable)
-            if let nativeFocused { try await debugWindowsIfRecording(nativeFocused, .cancellable) }
-            updateFocusCache(nativeFocused)
+            try await updateFocusCacheFromMacOs()
 
             if shouldLayoutWorkspaces && optimisticallyPreLayoutWorkspaces { try await layoutWorkspaces() }
 
@@ -66,9 +64,7 @@ func runLightSession<T>(
     activeRefreshTask?.cancel() // Give priority to runSession
     activeRefreshTask = nil
     return try await $refreshSessionEvent.withValue(event) {
-        let nativeFocused = try await getNativeFocusedWindow(.cancellable)
-        if let nativeFocused { try await debugWindowsIfRecording(nativeFocused, .cancellable) }
-        updateFocusCache(nativeFocused)
+        try await updateFocusCacheFromMacOs()
         let focusBefore = globalFocus.windowOrNil
 
         await refreshModel_nonCancellable()
@@ -86,6 +82,14 @@ func runLightSession<T>(
         if !event.isFocusFollowsMouse { scheduleCancellableCompleteRefreshSession(event) }
         return result
     }
+}
+
+/// Every session starts from the window that macOS considers focused
+@MainActor
+private func updateFocusCacheFromMacOs() async throws {
+    let nativeFocused = try await getNativeFocusedWindow(.cancellable)
+    if let nativeFocused { try await debugWindowsIfRecording(nativeFocused, .cancellable) }
+    updateFocusCache(nativeFocused)
 }
 
 enum RunSessionGuard: Sendable {

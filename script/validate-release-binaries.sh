@@ -13,8 +13,6 @@ expected_layout=$(cat <<EOF
 .release/HyprSpace.app/Contents/Resources/default-config.toml
 .release/HyprSpace.app/Contents/Resources/AppIcon.icns
 .release/HyprSpace.app/Contents/Resources/Assets.car
-.release/HyprSpace.app/Contents/Frameworks
-.release/HyprSpace.app/Contents/Frameworks/libswiftCompatibilitySpan.dylib
 .release/HyprSpace.app/Contents/Info.plist
 .release/HyprSpace.app/Contents/PkgInfo
 EOF
@@ -64,9 +62,7 @@ check-dylibs() {
         check-equals "$1 ($arch) dylibs" "$2" "$(xcrun objdump --macho --dylibs-used --no-leading-headers --arch "$arch" "$1" |
             sed -E 's/ \(compatibility version [^)]*, weak\)$/ (weak)/; s/ \(compatibility version [^)]*\)$//' |
             # Allow anything from /usr/lib/swift. Different Xcode versions link slightly different dylibs
-            sed -E '\|^./usr/lib/swift/|d' |
-            # Xcode 26 links it weak, Xcode 27 links it strong #macos27
-            sed -E 's|^(.@rpath/libswiftCompatibilitySpan\.dylib) \(weak\)$|\1|')"
+            sed -E '\|^./usr/lib/swift/|d')"
     done
 }
 
@@ -101,7 +97,6 @@ expected_app_dylibs=$(cat <<EOF
 	/System/Library/Frameworks/ServiceManagement.framework/Versions/A/ServiceManagement
 	/System/Library/Frameworks/SwiftUI.framework/Versions/A/SwiftUI
 	/usr/lib/libc++.1.dylib
-	@rpath/libswiftCompatibilitySpan.dylib
 EOF
 )
 check-dylibs .release/HyprSpace.app/Contents/MacOS/HyprSpace "$expected_app_dylibs"

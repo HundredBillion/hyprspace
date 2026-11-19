@@ -189,17 +189,13 @@ final class MacWindow: Window {
             // Just a small optimization to avoid unnecessary AX calls for non floating windows
             // Tiling windows should be unhidden with layoutRecursive anyway
             case .floatingWindow:
-                let workspaceRect = nodeWorkspace.workspaceMonitorInfo.rect
-                var newX = workspaceRect.topLeftX + workspaceRect.width * prevUnhiddenProportionalPositionInsideWorkspaceRect.x
-                var newY = workspaceRect.topLeftY + workspaceRect.height * prevUnhiddenProportionalPositionInsideWorkspaceRect.y
                 // todo we probably should replace lastFloatingSize with proper floating window sizing
                 // upstream issue #1519
-                let windowWidth = lastFloatingSize?.width ?? 0
-                let windowHeight = lastFloatingSize?.height ?? 0
-                newX = newX.coerce(in: workspaceRect.minX ... max(workspaceRect.minX, workspaceRect.maxX - windowWidth))
-                newY = newY.coerce(in: workspaceRect.minY ... max(workspaceRect.minY, workspaceRect.maxY - windowHeight))
-
-                setAxFrame(CGPoint(x: newX, y: newY), nil)
+                setAxFrame(Window.topLeftCorner(
+                    atProportion: prevUnhiddenProportionalPositionInsideWorkspaceRect,
+                    in: nodeWorkspace.workspaceMonitorInfo.rect,
+                    windowSize: lastFloatingSize ?? .zero,
+                ), nil)
             case .macosNativeFullscreenWindow, .macosNativeHiddenAppWindow, .macosNativeMinimizedWindow,
                  .macosPopupWindow, .tiling, .rootTilingContainer, .shimContainerRelation: break
         }
