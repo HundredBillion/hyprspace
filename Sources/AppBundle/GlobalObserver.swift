@@ -5,17 +5,39 @@ enum GlobalObserver {
     private static func onNotif(_ notification: Notification) {
         // Third line of defence against lock screen window. See: closedWindowsCache
         // Second and third lines of defence are technically needed only to avoid potential flickering
-        if (notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.bundleIdentifier == lockScreenAppBundleId {
+        let nsApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+        if nsApp?.bundleIdentifier == lockScreenAppBundleId {
             return
         }
+        let pid = nsApp?.processIdentifier
         let notifName = notification.name.rawValue
         Task.startUnstructured { @MainActor in
+            if let pid { noteAppEvent(notifName, pid: pid) }
             if !TrayMenuModel.shared.isEnabled { return }
             if notifName == NSWorkspace.didActivateApplicationNotification.rawValue {
                 scheduleCancellableCompleteRefreshSession(.globalObserver(notifName), optimisticallyPreLayoutWorkspaces: true)
             } else {
                 scheduleCancellableCompleteRefreshSession(.globalObserver(notifName))
             }
+        }
+    }
+
+    /// Keeps the knowledge about the running apps up to date without enumerating all of them on every refresh
+    @MainActor
+    private static func noteAppEvent(_ notifName: String, pid: pid_t) {
+        switch notifName {
+            case NSWorkspace.didLaunchApplicationNotification.rawValue:
+                forgetActivationPolicy(of: pid) // The pid may be reused
+                runningAppsScanSchedule.appsMayHaveChanged()
+            case NSWorkspace.didTerminateApplicationNotification.rawValue:
+                forgetActivationPolicy(of: pid) // The pid may be reused. Registered apps are destroyed by the refresh
+            default: // Activated or unhidden
+                // A process that isn't registered gets activated: it may have switched to the regular activation
+                // policy. Activations of registered apps happen all the time and don't change the set of apps
+                if MacApp.allAppsMap[pid] == nil {
+                    forgetActivationPolicy(of: pid)
+                    runningAppsScanSchedule.appsMayHaveChanged()
+                }
         }
     }
 

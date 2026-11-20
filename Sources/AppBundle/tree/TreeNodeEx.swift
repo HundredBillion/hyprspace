@@ -64,8 +64,18 @@ extension TreeNode {
         }
     }
 
+    /// The children are visited from the most recent one. A child without windows doesn't hide the windows of the other
+    /// children: e.g. the floating container of a workspace becomes its most recent child when it's lazily created
     var mostRecentWindowRecursive: Window? {
-        self as? Window ?? mostRecentChild?.mostRecentWindowRecursive
+        if let window = self as? Window { return window }
+        for child in _mruChildren {
+            if let window = child.mostRecentWindowRecursive { return window }
+        }
+        // Children that were never marked as recent (the MRU stack is filled on bind, so it's only a safety net)
+        for child in children.reversed() {
+            if let window = child.mostRecentWindowRecursive { return window }
+        }
+        return nil
     }
 
     var anyLeafWindowRecursive: Window? {

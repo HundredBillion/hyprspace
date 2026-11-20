@@ -151,6 +151,23 @@ public func throwT<T, E: Error>(_ error: E) throws(E) -> T { throw error }
 
 public func getStringStacktrace() -> String { Thread.callStackSymbols.joined(separator: "\n") }
 
+/// A stacktrace for a crash message that may never be printed. Capturing the return addresses is cheap.
+/// Resolving them to symbol names (the expensive part, a dladdr per frame) is deferred to `description`
+public struct LazyStacktrace: CustomStringConvertible, Sendable {
+    private let returnAddresses: [UInt]
+
+    public init() { returnAddresses = Thread.callStackReturnAddresses.map(\.uintValue) }
+
+    public var description: String {
+        var pointers = unsafe returnAddresses.map { unsafe UnsafeMutableRawPointer(bitPattern: $0) }
+        guard let symbols = unsafe backtrace_symbols(&pointers, Int32(pointers.count)) else {
+            return returnAddresses.lazy.map { "0x" + String($0, radix: 16) }.joined(separator: "\n")
+        }
+        defer { unsafe free(symbols) }
+        return unsafe (0 ..< pointers.count).lazy.map { unsafe symbols[$0].map { unsafe String(cString: $0) } ?? "???" }.joined(separator: "\n")
+    }
+}
+
 @inlinable public func die(_ message: String = "", fileId: MyFileId = #myFileId) -> Never {
     dieT(message, fileId: fileId)
 }

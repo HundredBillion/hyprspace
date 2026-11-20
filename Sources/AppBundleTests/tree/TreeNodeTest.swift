@@ -15,6 +15,16 @@ struct TreeNodeTest {
         #expect(window.parent == nil)
     }
 
+    @Test func testEmptyFloatingContainerDoesNotHideTheMostRecentWindow() {
+        let workspace = Workspace.get(byName: name)
+        let window = TestWindow.new(id: 1, parent: workspace.rootTilingContainer)
+        assertEquals(window.focusWindow(), true)
+        // The floating container is created lazily, by the first code that touches it. Its creation makes it the most
+        // recent child of the workspace, although it has no windows
+        _ = workspace.floatingWindowsContainer
+        assertEquals(workspace.mostRecentWindowRecursive?.windowId, 1)
+    }
+
     @Test func testIsEffectivelyEmpty() {
         let workspace = Workspace.get(byName: name)
 

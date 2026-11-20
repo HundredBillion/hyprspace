@@ -101,25 +101,26 @@ extension Window {
         let workspace = context.workspace
         let currentMonitor = windowRect?.center.monitorApproximation
         if let currentMonitor, let windowRect, workspace != currentMonitor.visibleWorkspace {
-            let windowTopLeftCorner = windowRect.topLeftCorner
-            let xProportion = (windowTopLeftCorner.x - currentMonitor.visibleRect.topLeftX) / currentMonitor.visibleRect.width
-            let yProportion = (windowTopLeftCorner.y - currentMonitor.visibleRect.topLeftY) / currentMonitor.visibleRect.height
-
-            let workspaceRect = workspace.workspaceMonitorInfo.visibleRect
-            var newX = workspaceRect.topLeftX + xProportion * workspaceRect.width
-            var newY = workspaceRect.topLeftY + yProportion * workspaceRect.height
-
-            let windowWidth = windowRect.width
-            let windowHeight = windowRect.height
-            newX = newX.coerce(in: workspaceRect.minX ... max(workspaceRect.minX, workspaceRect.maxX - windowWidth))
-            newY = newY.coerce(in: workspaceRect.minY ... max(workspaceRect.minY, workspaceRect.maxY - windowHeight))
-
-            setAxFrame(CGPoint(x: newX, y: newY), nil)
+            let monitorRect = currentMonitor.visibleRect
+            let proportion = CGPoint(
+                x: (windowRect.topLeftX - monitorRect.topLeftX) / monitorRect.width,
+                y: (windowRect.topLeftY - monitorRect.topLeftY) / monitorRect.height,
+            )
+            setAxFrame(Window.topLeftCorner(atProportion: proportion, in: workspace.workspaceMonitorInfo.visibleRect, windowSize: windowRect.size), nil)
         }
         if isFullscreen {
             layoutFullscreen(context)
             isFullscreen = false
         }
+    }
+
+    /// The top-left corner of a window that keeps its relative position (`proportion` of the width and height) inside
+    /// of `rect`. The window is moved back inside of `rect` if it would stick out of it
+    static func topLeftCorner(atProportion proportion: CGPoint, in rect: Rect, windowSize: CGSize) -> CGPoint {
+        CGPoint(
+            x: (rect.topLeftX + proportion.x * rect.width).coerce(in: rect.minX ... max(rect.minX, rect.maxX - windowSize.width)),
+            y: (rect.topLeftY + proportion.y * rect.height).coerce(in: rect.minY ... max(rect.minY, rect.maxY - windowSize.height)),
+        )
     }
 
     @MainActor

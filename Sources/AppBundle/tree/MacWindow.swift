@@ -189,17 +189,13 @@ final class MacWindow: Window {
             // Just a small optimization to avoid unnecessary AX calls for non floating windows
             // Tiling windows should be unhidden with layoutRecursive anyway
             case .floatingWindow:
-                let workspaceRect = nodeWorkspace.workspaceMonitorInfo.rect
-                var newX = workspaceRect.topLeftX + workspaceRect.width * prevUnhiddenProportionalPositionInsideWorkspaceRect.x
-                var newY = workspaceRect.topLeftY + workspaceRect.height * prevUnhiddenProportionalPositionInsideWorkspaceRect.y
                 // todo we probably should replace lastFloatingSize with proper floating window sizing
                 // upstream issue #1519
-                let windowWidth = lastFloatingSize?.width ?? 0
-                let windowHeight = lastFloatingSize?.height ?? 0
-                newX = newX.coerce(in: workspaceRect.minX ... max(workspaceRect.minX, workspaceRect.maxX - windowWidth))
-                newY = newY.coerce(in: workspaceRect.minY ... max(workspaceRect.minY, workspaceRect.maxY - windowHeight))
-
-                setAxFrame(CGPoint(x: newX, y: newY), nil)
+                setAxFrame(Window.topLeftCorner(
+                    atProportion: prevUnhiddenProportionalPositionInsideWorkspaceRect,
+                    in: nodeWorkspace.workspaceMonitorInfo.rect,
+                    windowSize: lastFloatingSize ?? .zero,
+                ), nil)
             case .macosNativeFullscreenWindow, .macosNativeHiddenAppWindow, .macosNativeMinimizedWindow,
                  .macosPopupWindow, .tiling, .rootTilingContainer, .shimContainerRelation: break
         }
@@ -264,9 +260,9 @@ private func unbindAndGetBindingData(_ windowType: AxUiElementWindowType, _ work
     }
 }
 
-// The function is private because it's unsafe. It leaves the window in unbound state
+// The function is unsafe: it leaves the window in unbound state. The caller must bind it right away
 @MainActor
-private func unbindAndGetBindingDataForNewTilingWindow(_ workspace: Workspace, window: Window?) -> BindingData {
+func unbindAndGetBindingDataForNewTilingWindow(_ workspace: Workspace, window: Window?) -> BindingData {
     window?.unbindFromParent() // It's important to unbind to get correct data from below
     if config.newWindowPlacement == .master {
         return getMasterBindingData(root: workspace.rootTilingContainer)
@@ -274,9 +270,8 @@ private func unbindAndGetBindingDataForNewTilingWindow(_ workspace: Workspace, w
     if let (tilingParent, index) = workspace.mostRecentWindowRecursive?.nearestAliveTilingParent() {
         return switch config.newWindowPlacement {
             case .sibling: BindingData(parent: tilingParent, adaptiveWeight: WEIGHT_AUTO, index: index + 1)
-            // On startup, the sizes of the windows are not known yet. Dozens of already opened windows would be
-            // nested into a deep spiral, so they are laid out flat instead
-            case .dwindle where isStartup: BindingData(parent: tilingParent, adaptiveWeight: WEIGHT_AUTO, index: index + 1)
+            // Also on startup: the sizes of the windows aren't known yet, and dwindle falls back to the orientation
+            // that is opposite to the parent's one. That's the same alternation that the sizes would give
             case .dwindle: getDwindleBindingData(parent: tilingParent, splitTargetIndex: index)
             case .master: dieT("Master placement is handled above")
         }

@@ -38,21 +38,21 @@ enum AxPermissionStatus: Equatable {
         }
         .joined(separator: " │ ")
     let workspaces = Workspace.all.map {
-        let apps = $0.allLeafWindowsRecursive.map { $0.app.name?.takeIf { !$0.isEmpty } }.filterNotNil().toSet()
+        let windows = $0.allLeafWindowsRecursive // The tree is walked once per workspace
+        let apps = windows.map { $0.app.name?.takeIf { !$0.isEmpty } }.filterNotNil().toSet()
         let dash = " - "
         let suffix = switch true {
             case !apps.isEmpty: dash + apps.sorted().joinTruncating(separator: ", ", length: 25)
             case $0.isVisible: dash + $0.workspaceMonitorInfo.name
             default: ""
         }
-        let hasFullscreenWindows = $0.allLeafWindowsRecursive.contains { $0.isFullscreen }
         return WorkspaceViewModel(
             name: $0.name,
             suffix: suffix,
             isFocused: focus.workspace == $0,
-            isEffectivelyEmpty: $0.isEffectivelyEmpty,
+            isEffectivelyEmpty: windows.isEmpty,
             isVisible: $0.isVisible,
-            hasFullscreenWindows: hasFullscreenWindows,
+            hasFullscreenWindows: windows.contains { $0.isFullscreen },
         )
     }
     var items = visibleWorkspaces.map {

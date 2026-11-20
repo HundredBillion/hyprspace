@@ -18,7 +18,7 @@ open class TreeNode: Equatable, HyprAny {
     // - move-mouse command
     // - focus-follows-mouse
     var lastAppliedLayoutPhysicalRect: Rect? = nil // with real inner gaps
-    final var unboundStacktrace: String? = nil
+    final var unboundStacktrace: LazyStacktrace? = nil
     var isBound: Bool { parent != nil } // todo drop, once upstream issue #1215 is fixed
 
     @MainActor
@@ -112,7 +112,7 @@ open class TreeNode: Equatable, HyprAny {
         let index = _parent._children.remove(element: self) ?? dieT("Can't find child in its parent")
         check(_parent._mruChildren.remove(self))
         self._parent = nil
-        unboundStacktrace = getStringStacktrace()
+        unboundStacktrace = LazyStacktrace() // Every workspace switch unbinds nodes. Symbolicating each time was expensive
 
         return BindingData(parent: _parent, adaptiveWeight: adaptiveWeight, index: index)
     }

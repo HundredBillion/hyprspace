@@ -143,6 +143,53 @@ struct DwindlePlacementTest {
         assertEquals(root.layoutDescription, .h_accordion([.window(0), .window(1), .window(2)]))
     }
 
+    @Test func testStartupDwindlesWithoutKnownSizes() async throws {
+        // At startup the windows that are already open are detected one after another, before any layout pass,
+        // so their sizes are unknown. They must still dwindle instead of becoming a row of narrow columns
+        let workspace = Workspace.get(byName: name)
+        try await $refreshSessionEvent.withValue(.startup) {
+            for id: OpaqueWindowId in [0, 1, 2, 3] {
+                assertEquals(try await detectNewWindow(id: id, on: workspace).focusWindow(), true)
+            }
+        }
+        assertEquals(workspace.rootTilingContainer.layoutDescription, .h_tiles([
+            .window(0),
+            .v_tiles([
+                .window(1),
+                .h_tiles([.window(2), .window(3)]),
+            ]),
+        ]))
+    }
+
+    /// Workspace "dst" has two windows side by side. Window 1 is its selected (most recent) window.
+    /// Window 2 is focused on workspace "src"
+    private func setUpMoveToWorkspace() -> TilingContainer {
+        let target = Workspace.get(byName: "dst").rootTilingContainer
+        TestWindow.new(id: 0, parent: target)
+        let window1 = TestWindow.new(id: 1, parent: target)
+        assertEquals(window1.focusWindow(), true)
+        window1.lastAppliedLayoutPhysicalRect = rect(width: 756, height: 948) // Half of a laptop screen: taller than wide
+        assertEquals(TestWindow.new(id: 2, parent: Workspace.get(byName: "src").rootTilingContainer).focusWindow(), true)
+        return target
+    }
+
+    @Test func testMovedWindowSplitsTheSelectedWindowOfTheTargetWorkspace() async {
+        let target = setUpMoveToWorkspace()
+        await parseCommand("move-node-to-workspace dst").cmdOrDie.run(.defaultEnv, .emptyStdin)
+        // Not a third narrow column: the selected window is split along its longer side, like for a new window
+        assertEquals(target.layoutDescription, .h_tiles([
+            .window(0),
+            .v_tiles([.window(1), .window(2)]),
+        ]))
+    }
+
+    @Test func testMovedWindowIsAppendedWithSiblingPlacement() async {
+        config.newWindowPlacement = .sibling
+        let target = setUpMoveToWorkspace()
+        await parseCommand("move-node-to-workspace dst").cmdOrDie.run(.defaultEnv, .emptyStdin)
+        assertEquals(target.layoutDescription, .h_tiles([.window(0), .window(1), .window(2)]))
+    }
+
     @Test func testParseConfig() {
         let dwindle = parseConfig("new-window-placement = 'dwindle'")
         assertEquals(dwindle.errors, [])
