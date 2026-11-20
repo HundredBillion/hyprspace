@@ -319,21 +319,33 @@ final class MacApp: AbstractApp {
                     return (MainActorRef.init(app), try await app.refreshAndGetAliveWindowIds(frontmostAppBundleId: frontmostAppBundleId))
                 }
             }
-            // Register new apps
-            for nsApp in NSWorkspace.shared.runningApplications {
-                try checkCancellation()
-                if nsApp.activationPolicy == .regular, let app = try await MacApp.getOrRegister(nsApp) {
-                    refreshTheApp(app)
+            // Register new apps. Enumerating the running apps is expensive: the first property that is read from each
+            // NSRunningApplication is a synchronous request to LaunchServices, for well over a hundred processes.
+            // The running apps only change when an app launches, terminates or gets activated. See GlobalObserver
+            if runningAppsScanSchedule.isScanNeeded {
+                let scan = runningAppsScanSchedule.start()
+                let runningApps = NSWorkspace.shared.runningApplications
+                let asked = processesToAskForActivationPolicy(
+                    running: runningApps.map(\.processIdentifier),
+                    registered: MacApp.allAppsMap.keys.toSet(),
+                    knownNonRegular: knownNonRegularProcesses,
+                ).toSet()
+                for nsApp in runningApps where asked.contains(nsApp.processIdentifier) {
+                    try checkCancellation()
+                    if nsApp.activationPolicy == .regular {
+                        try await MacApp.getOrRegister(nsApp)
+                    } else {
+                        rememberNonRegularProcess(nsApp.processIdentifier)
+                    }
                 }
+                runningAppsScanSchedule.finish(scan)
             }
+            // The registered regular apps, and the utility apps whose windows got focused ("About this Mac", TouchID,
+            // and a lot of other utility windows). We don't monitor utility apps actively as we do for regular apps,
+            // but if a window of one of those got focused it ends up in allAppsMap
             for app in MacApp.allAppsMap.values {
                 try checkCancellation()
-                // "About this Mac" window, TouchID, and a lot of other utility windows
-                // We don't monitor them actively as we do for regular apps, but if a window of one of those utility
-                // apps got focused it will end up in allAppsMap
-                if app.nsApp.activationPolicy != .regular {
-                    refreshTheApp(app)
-                }
+                refreshTheApp(app)
             }
             var result: [MacApp: [OpaqueWindowId: WindowLifeStatus]] = [:]
             for try await (macAppRef, windowIds) in group {
@@ -514,6 +526,38 @@ private func disableAnimations<T>(app: AXUIElement, _ job: RunLoopJob, _ body: (
     }
     try job.checkCancellation()
     return try body()
+}
+
+/// Processes that answered that they aren't regular apps (agents, daemons, menu bar apps...). Every activationPolicy
+/// call is a request to LaunchServices, and there are well over a hundred processes, so they aren't asked again on
+/// every refresh. A process is forgotten when it launches, terminates or gets activated: that's when a background
+/// app that switched to the regular activation policy shows up. See GlobalObserver
+@MainActor private(set) var knownNonRegularProcesses: Set<pid_t> = []
+@MainActor func rememberNonRegularProcess(_ pid: pid_t) { knownNonRegularProcesses.insert(pid) }
+@MainActor func forgetActivationPolicy(of pid: pid_t) { knownNonRegularProcesses.remove(pid) }
+@MainActor func resetKnownNonRegularProcesses() { knownNonRegularProcesses = [] }
+
+@MainActor var runningAppsScanSchedule = RunningAppsScanSchedule()
+
+/// Decides when the running apps have to be enumerated again: at startup, and after an app launched, terminated or got
+/// activated. An event that arrives while a scan is in progress, or a scan that was cancelled, leads to another scan
+struct RunningAppsScanSchedule {
+    private var generation = 1 // Incremented on every app event
+    private var scannedGeneration = 0 // The generation that the last finished scan has seen
+
+    var isScanNeeded: Bool { scannedGeneration != generation }
+
+    mutating func appsMayHaveChanged() { generation += 1 }
+
+    /// - Returns: the token for ``finish(_:)``
+    mutating func start() -> Int { generation }
+
+    mutating func finish(_ scan: Int) { scannedGeneration = scan }
+}
+
+/// The processes whose activation policy is unknown: they are neither registered apps nor known non regular processes
+func processesToAskForActivationPolicy(running: [pid_t], registered: Set<pid_t>, knownNonRegular: Set<pid_t>) -> [pid_t] {
+    running.filter { !registered.contains($0) && !knownNonRegular.contains($0) }
 }
 
 final class MainActorRef<T>: Sendable {
