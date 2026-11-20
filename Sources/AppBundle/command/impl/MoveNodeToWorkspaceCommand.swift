@@ -28,8 +28,11 @@ struct MoveNodeToWorkspaceCommand: Command {
     }
 }
 
+/// - Parameter index: the index in the root container of the target workspace. nil places a tiling window like a new
+///   window ('new-window-placement'): with dwindle, it splits the selected window of the target workspace along the
+///   longer side instead of becoming yet another narrow column
 @MainActor
-func moveWindowToWorkspace(_ window: Window, _ targetWorkspace: Workspace, _ io: CmdIo, focusFollowsWindow: Bool, failIfNoop: Bool, index: Int = INDEX_BIND_LAST) -> BinaryExitCode {
+func moveWindowToWorkspace(_ window: Window, _ targetWorkspace: Workspace, _ io: CmdIo, focusFollowsWindow: Bool, failIfNoop: Bool, index: Int? = nil) -> BinaryExitCode {
     if window.nodeWorkspace == targetWorkspace {
         return switch failIfNoop {
             case true: .fail
@@ -37,9 +40,13 @@ func moveWindowToWorkspace(_ window: Window, _ targetWorkspace: Workspace, _ io:
                 .succ(io.err("Window '\(window.windowId)' already belongs to workspace '\(targetWorkspace.name)'. Tip: use --fail-if-noop to exit with non-zero code"))
         }
     }
-    let targetContainer: NonLeafTreeNodeObject = window.isFloating
-        ? targetWorkspace.floatingWindowsContainer
-        : targetWorkspace.rootTilingContainer
-    window.bind(to: targetContainer, adaptiveWeight: WEIGHT_AUTO, index: index)
+    if window.isFloating {
+        window.bind(to: targetWorkspace.floatingWindowsContainer, adaptiveWeight: WEIGHT_AUTO, index: index ?? INDEX_BIND_LAST)
+    } else if let index {
+        window.bind(to: targetWorkspace.rootTilingContainer, adaptiveWeight: WEIGHT_AUTO, index: index)
+    } else {
+        let data = unbindAndGetBindingDataForNewTilingWindow(targetWorkspace, window: window)
+        window.bind(to: data.parent, adaptiveWeight: data.adaptiveWeight, index: data.index)
+    }
     return .from(bool: focusFollowsWindow ? window.focusWindow() : true)
 }

@@ -260,9 +260,9 @@ private func unbindAndGetBindingData(_ windowType: AxUiElementWindowType, _ work
     }
 }
 
-// The function is private because it's unsafe. It leaves the window in unbound state
+// The function is unsafe: it leaves the window in unbound state. The caller must bind it right away
 @MainActor
-private func unbindAndGetBindingDataForNewTilingWindow(_ workspace: Workspace, window: Window?) -> BindingData {
+func unbindAndGetBindingDataForNewTilingWindow(_ workspace: Workspace, window: Window?) -> BindingData {
     window?.unbindFromParent() // It's important to unbind to get correct data from below
     if config.newWindowPlacement == .master {
         return getMasterBindingData(root: workspace.rootTilingContainer)
