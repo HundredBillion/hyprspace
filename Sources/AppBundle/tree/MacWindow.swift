@@ -270,9 +270,8 @@ func unbindAndGetBindingDataForNewTilingWindow(_ workspace: Workspace, window: W
     if let (tilingParent, index) = workspace.mostRecentWindowRecursive?.nearestAliveTilingParent() {
         return switch config.newWindowPlacement {
             case .sibling: BindingData(parent: tilingParent, adaptiveWeight: WEIGHT_AUTO, index: index + 1)
-            // On startup, the sizes of the windows are not known yet. Dozens of already opened windows would be
-            // nested into a deep spiral, so they are laid out flat instead
-            case .dwindle where isStartup: BindingData(parent: tilingParent, adaptiveWeight: WEIGHT_AUTO, index: index + 1)
+            // Also on startup: the sizes of the windows aren't known yet, and dwindle falls back to the orientation
+            // that is opposite to the parent's one. That's the same alternation that the sizes would give
             case .dwindle: getDwindleBindingData(parent: tilingParent, splitTargetIndex: index)
             case .master: dieT("Master placement is handled above")
         }

@@ -143,6 +143,24 @@ struct DwindlePlacementTest {
         assertEquals(root.layoutDescription, .h_accordion([.window(0), .window(1), .window(2)]))
     }
 
+    @Test func testStartupDwindlesWithoutKnownSizes() async throws {
+        // At startup the windows that are already open are detected one after another, before any layout pass,
+        // so their sizes are unknown. They must still dwindle instead of becoming a row of narrow columns
+        let workspace = Workspace.get(byName: name)
+        try await $refreshSessionEvent.withValue(.startup) {
+            for id: OpaqueWindowId in [0, 1, 2, 3] {
+                assertEquals(try await detectNewWindow(id: id, on: workspace).focusWindow(), true)
+            }
+        }
+        assertEquals(workspace.rootTilingContainer.layoutDescription, .h_tiles([
+            .window(0),
+            .v_tiles([
+                .window(1),
+                .h_tiles([.window(2), .window(3)]),
+            ]),
+        ]))
+    }
+
     /// Workspace "dst" has two windows side by side. Window 1 is its selected (most recent) window.
     /// Window 2 is focused on workspace "src"
     private func setUpMoveToWorkspace() -> TilingContainer {
